@@ -296,6 +296,12 @@ const DATA = {
 
   contacts: [
     { id:1, name:'Marie Vandenberghe', email:'marie.vdb@gmail.com', roles:['Bezoeker','Nieuwsbrief'], sources:['tm','mc'], lastInteraction:'12 apr 2026', tickets12m:7, phone:'+32 476 12 34 56', address:'Dansaertstraat 42, 1000 Brussel', lang:'NL', since:'14/09/2021', spent:168, pref:['Dans','Performance'], consent:{newsletter:{status:'opt-in',since:'12/01/2023'},promo:{status:'opt-in',since:'12/01/2023'},service:{status:'opt-in',since:'14/09/2021'}}, avatar:'MV', color:'var(--accent)', owner:'Jonas Maes',
+      fields:{
+        email:{value:'marie.vdb@gmail.com',source:'tm',lastSync:'14 apr 2026',conflict:null},
+        phone:{value:'+32 476 12 34 56',source:'tm',lastSync:'14 apr 2026',conflict:null},
+        address:{value:'Dansaertstraat 42, 1000 Brussel',source:'tm',lastSync:'14 apr 2026',conflict:{source:'mc',value:'Dansaertstr. 42, 1000 BXL',reason:'Afkorting verschilt'}},
+        lang:{value:'NL',source:'mc',lastSync:'14 apr 2026',conflict:null},
+      },
       timeline:[
         {type:'ticket',title:'Ticket gekocht — Meg Stuart / BEAST',date:'12 apr 2026',source:'tm'},
         {type:'email',title:'E-mail geopend — Herinnering Meg Stuart',date:'10 apr 2026',source:'mc'},
@@ -307,7 +313,12 @@ const DATA = {
         {type:'note',title:'Notitie: Sprak Marie na de voorstelling. Geinteresseerd in seizoensabonnement.',date:'22 jan 2026',source:'crm',by:'Jonas Maes'},
       ]
     },
-    { id:2, name:'Needcompany vzw', email:'productie@needcompany.org', roles:['Gezelschap','Coproducent'], sources:['yp','zs'], lastInteraction:'8 apr 2026', tickets12m:0, phone:'+32 2 219 60 60', address:'Koopliedenstraat 17, 1000 Brussel', lang:'NL/EN', avatar:'NC', color:'var(--blue)', owner:'Programmatie' },
+    { id:2, name:'Needcompany vzw', email:'productie@needcompany.org', roles:['Gezelschap','Coproducent'], sources:['yp','zs'], lastInteraction:'8 apr 2026', tickets12m:0, phone:'+32 2 219 60 60', address:'Koopliedenstraat 17, 1000 Brussel', lang:'NL/EN', avatar:'NC', color:'var(--blue)', owner:'Programmatie',
+      fields:{
+        email:{value:'productie@needcompany.org',source:'yp',lastSync:'14 apr 2026',conflict:{source:'zs',value:'admin@needcompany.org',reason:'Zensoft heeft ander e-mailadres'}},
+        phone:{value:'+32 2 219 60 60',source:'yp',lastSync:'14 apr 2026',conflict:null},
+        address:{value:'Koopliedenstraat 17, 1000 Brussel',source:'zs',lastSync:'13 apr 2026',conflict:null},
+      }},
     { id:3, name:'Thomas De Smedt', email:'thomas@textualcreatures.com', roles:['Artiest','Bezoeker'], sources:['yp','mc'], lastInteraction:'3 apr 2026', tickets12m:3, avatar:'TD', color:'var(--purple)', owner:'Programmatie' },
     { id:4, name:'Sophie Janssens', email:'sophie.j@hotmail.com', roles:['Bezoeker','Trouwe bezoeker','Vrijwilliger'], sources:['tm','mc','zs'], lastInteraction:'1 apr 2026', tickets12m:12, avatar:'SJ', color:'var(--coral)', owner:'Titane Michiels' },
     { id:5, name:'De Morgen — Cultuurredactie', email:'cultuur@demorgen.be', roles:['Pers'], sources:['mc'], lastInteraction:'28 mrt 2026', tickets12m:0, avatar:'DM', color:'var(--amber)', owner:'Mara Ittel' },
@@ -915,10 +926,13 @@ function renderProductieDetail() {
 
     <div class="tabs" id="prod-tabs">
       <button class="tab active" onclick="switchProdTab('planning')">Planning</button>
+      <button class="tab" onclick="switchProdTab('contract')">Contract</button>
+      <button class="tab" onclick="switchProdTab('techniek')">Techniek</button>
       <button class="tab" onclick="switchProdTab('budget')">Budget</button>
       <button class="tab" onclick="switchProdTab('campagne')">Communicatie</button>
-      <button class="tab" onclick="switchProdTab('website')">Website-content</button>
+      <button class="tab" onclick="switchProdTab('website')">Website</button>
       <button class="tab" onclick="switchProdTab('hospitality')">Hospitality</button>
+      <button class="tab" onclick="switchProdTab('documenten')">Documenten</button>
       <button class="tab" onclick="switchProdTab('evaluatie')">Evaluatie</button>
     </div>
 
@@ -948,6 +962,79 @@ function renderProductieDetail() {
             <div class="detail-row"><span class="detail-label">Vrijwilligers</span><span class="detail-value">${volShifts?volShifts.filled+'/'+volShifts.needed+' ingevuld':'Nog niet ingepland'}</span></div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- TAB: Contract & juridisch -->
+    <div id="prod-tab-contract" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:14px">Contractgegevens</div>
+          <div class="detail-row"><span class="detail-label">Type overeenkomst</span><span class="detail-value">${p.capacity>200?'Uitkoopsom':'Coproductie-split'}</span></div>
+          <div class="detail-row"><span class="detail-label">Fee / uitkoopsom</span><span class="detail-value">EUR ${fmtN(p.capacity>200?4200:2400)}</span></div>
+          <div class="detail-row"><span class="detail-label">Recette-verdeling</span><span class="detail-value">${p.capacity>200?'N.v.t. (uitkoop)':'70/30 (Kaaitheater/gezelschap)'}</span></div>
+          <div class="detail-row"><span class="detail-label">Reiskosten</span><span class="detail-value">EUR 850 (forfait)</span></div>
+          <div class="detail-row"><span class="detail-label">Per diem</span><span class="detail-value">EUR 45/dag x ${p.dates.includes('-')?'4':'2'} personen</span></div>
+          <div class="detail-row"><span class="detail-label">Contractstatus</span><span class="detail-value" style="color:var(--accent)">Getekend</span></div>
+          <div class="detail-row"><span class="detail-label">Ondertekend op</span><span class="detail-value">12 jan 2026</span></div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-bottom:14px">Facturatie</div>
+          <div class="detail-row"><span class="detail-label">Factuur ontvangen</span><span class="detail-value" style="color:var(--accent)">Ja — 28 mrt 2026</span></div>
+          <div class="detail-row"><span class="detail-label">Factuurnummer</span><span class="detail-value" style="font-family:monospace;font-size:12px">NC-2026-0047</span></div>
+          <div class="detail-row"><span class="detail-label">Bedrag</span><span class="detail-value">EUR ${fmtN(p.capacity>200?5050:3250)}</span></div>
+          <div class="detail-row"><span class="detail-label">BTW</span><span class="detail-value">6% (podiumkunsten)</span></div>
+          <div class="detail-row"><span class="detail-label">Betaalstatus</span><span class="detail-value"><span class="tag tag-green">Betaald</span></span></div>
+          <div class="detail-row"><span class="detail-label">Zensoft-ref</span><span class="detail-value" style="font-family:monospace;font-size:12px">ZS-2026-1204</span></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="section-title" style="margin-bottom:14px">Rechten & licenties</div>
+        <div class="detail-row"><span class="detail-label">SABAM-aangifte</span><span class="detail-value"><span class="tag tag-green">Ingediend</span></span></div>
+        <div class="detail-row"><span class="detail-label">Billijke vergoeding</span><span class="detail-value">Via Playright+ (jaarcontract)</span></div>
+        <div class="detail-row"><span class="detail-label">Beeldrechten</span><span class="detail-value">Vrij gebruik promo + archief. Credit verplicht: Danny Willems</span></div>
+        <div class="detail-row"><span class="detail-label">Captatie / registratie</span><span class="detail-value">Niet toegestaan (cfr. contract art. 8)</span></div>
+      </div>
+    </div>
+
+    <!-- TAB: Techniek & draaiboek -->
+    <div id="prod-tab-techniek" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:14px">Technische rider</div>
+          <div class="detail-row"><span class="detail-label">Podium</span><span class="detail-value">12m x 10m, zwarte vloer, vlak</span></div>
+          <div class="detail-row"><span class="detail-label">Licht</span><span class="detail-value">ETC Source Four x 24, LED wash x 12, haze machine</span></div>
+          <div class="detail-row"><span class="detail-label">Geluid</span><span class="detail-value">D&B E12 (L/R), 2x sub, 4 monitors, 8ch Yamaha mixer</span></div>
+          <div class="detail-row"><span class="detail-label">Video</span><span class="detail-value">1x beamer 10K lumen, scherm 6x4m</span></div>
+          <div class="detail-row"><span class="detail-label">Kleedkamers</span><span class="detail-value">2 (min. 6 personen + spiegel + douche)</span></div>
+          <div class="detail-row"><span class="detail-label">Opslag</span><span class="detail-value">Laadruimte + vrachtwagen-toegang</span></div>
+          <div class="detail-row"><span class="detail-label">Rider status</span><span class="detail-value"><span class="tag tag-green">Goedgekeurd</span></span></div>
+          <div class="detail-row"><span class="detail-label">Bron</span><span class="detail-value">Via Yesplan (${p.yesplanId})</span></div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-bottom:14px">Crew-planning</div>
+          <div class="detail-row"><span class="detail-label">Technisch directeur</span><span class="detail-value">Tom Peeters</span></div>
+          <div class="detail-row"><span class="detail-label">Lichtontwerp</span><span class="detail-value">Via gezelschap</span></div>
+          <div class="detail-row"><span class="detail-label">Geluidstechnicus</span><span class="detail-value">Koen Willems (vrijwilliger)</span></div>
+          <div class="detail-row"><span class="detail-label">Podiummeester</span><span class="detail-value">Sarah Willems</span></div>
+          <div class="detail-row" style="border-top:2px solid var(--border);padding-top:12px"><span class="detail-label">Opbouw</span><span class="detail-value">${p.dates.split(' ')[0].replace('-','/')} — 10:00 (8u)</span></div>
+          <div class="detail-row"><span class="detail-label">Soundcheck</span><span class="detail-value">16:00 – 17:30</span></div>
+          <div class="detail-row"><span class="detail-label">Afbraak</span><span class="detail-value">Na voorstelling (3u)</span></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="section-title" style="margin-bottom:14px">Avondschema / draaiboek</div>
+        ${[
+          {time:'16:00',what:'Opbouw voltooid, podium vrij voor gezelschap'},
+          {time:'16:00 – 17:30',what:'Soundcheck + lichtfocus gezelschap'},
+          {time:'17:30 – 18:00',what:'Pauze crew'},
+          {time:'18:00',what:'Bar opent, vrijwilligers aanwezig'},
+          {time:'18:30',what:'Deuren open, onthaal publiek'},
+          {time:'19:00',what:'Aanvang voorstelling (geen latecomers)'},
+          {time:'20:30',what:'Einde voorstelling (geen pauze, 90 min)'},
+          {time:'20:30 – 21:00',what:'Nagesprek in foyer (optioneel)'},
+          {time:'21:00 – 23:30',what:'Afbraak + laden vrachtwagen'},
+        ].map(s=>`<div style="display:flex;gap:16px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="width:130px;font-size:13px;font-weight:600;color:var(--ink);flex-shrink:0;font-family:monospace">${s.time}</span><span style="font-size:13px;color:var(--body)">${s.what}</span></div>`).join('')}
       </div>
     </div>
 
@@ -1068,6 +1155,29 @@ function renderProductieDetail() {
     </div>
 
     <!-- TAB: Evaluatie -->
+    <!-- TAB: Documenten -->
+    <div id="prod-tab-documenten" class="tab-content">
+      <div class="card">
+        <div class="section-header"><div class="section-title">Alle documenten</div><button class="btn btn-primary btn-sm">${ICONS.plus} Document uploaden</button></div>
+        ${[
+          {name:'Contract — '+p.artist+'.pdf',type:'Contract',date:'12 jan 2026',by:'Zakelijke leiding',size:'240 KB'},
+          {name:'Technische rider.pdf',type:'Techniek',date:'18 jan 2026',by:'Via Yesplan',size:'1.2 MB'},
+          {name:'Persdossier NL-EN.pdf',type:'Communicatie',date:'1 mrt 2026',by:'Mara Ittel',size:'3.8 MB'},
+          {name:'Persdossier FR.pdf',type:'Communicatie',date:'1 mrt 2026',by:'NAKAMI',size:'3.6 MB'},
+          {name:'Hoofdbeeld — Danny Willems.jpg',type:'Beeldmateriaal',date:'15 feb 2026',by:'Mara Ittel',size:'8.2 MB'},
+          {name:'Portretfoto — Danny Willems.jpg',type:'Beeldmateriaal',date:'15 feb 2026',by:'Mara Ittel',size:'5.4 MB'},
+          {name:'Factuur NC-2026-0047.pdf',type:'Financieel',date:'28 mrt 2026',by:'Via Zensoft',size:'89 KB'},
+          {name:'SABAM-aangifte.pdf',type:'Juridisch',date:'10 mrt 2026',by:'Zakelijke leiding',size:'42 KB'},
+          {name:'Draaiboek avond.docx',type:'Planning',date:'10 apr 2026',by:'Sarah Willems',size:'28 KB'},
+        ].map(d=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0">${ICONS.download}</div>
+          <div style="flex:1"><div style="font-weight:600;color:var(--ink);font-size:13px">${d.name}</div><div style="font-size:11px;color:var(--muted)">${d.date} — ${d.by} — ${d.size}</div></div>
+          <span class="tag tag-default">${d.type}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- TAB: Evaluatie -->
     <div id="prod-tab-evaluatie" class="tab-content">
       <div class="stats-grid" style="grid-template-columns:repeat(5,1fr)">
         <div class="card"><div class="stat-label">Tickets</div><div class="stat-value" style="font-size:22px">${p.sold}</div><div class="stat-sub">${sold_pct}% bezetting</div></div>
@@ -1081,16 +1191,60 @@ function renderProductieDetail() {
           <div class="detail-row"><span class="detail-label">Campagne verstuurd</span><span class="detail-value">${campaigns.length>0?fmtN(campaigns[0].recipients):'—'}</span></div>
           <div class="detail-row"><span class="detail-label">E-mail geopend</span><span class="detail-value">${campaigns.length>0&&campaigns[0].openRate?Math.round(campaigns[0].recipients*campaigns[0].openRate/100)+' ('+campaigns[0].openRate+'%)':'—'}</span></div>
           <div class="detail-row"><span class="detail-label">Doorgeklikt</span><span class="detail-value">${campaigns.length>0&&campaigns[0].clickRate?Math.round(campaigns[0].recipients*campaigns[0].clickRate/100)+' ('+campaigns[0].clickRate+'%)':'—'}</span></div>
-          <div class="detail-row"><span class="detail-label">Ticket gekocht via campagne</span><span class="detail-value" style="color:var(--accent);font-weight:700">${campaigns.filter(c=>c.tickets).reduce((a,c)=>a+c.tickets,0)}</span></div>
+          <div class="detail-row"><span class="detail-label">Ticket via campagne</span><span class="detail-value" style="color:var(--accent);font-weight:700">${campaigns.filter(c=>c.tickets).reduce((a,c)=>a+c.tickets,0)}</span></div>
         </div>
         <div class="card"><div class="section-title" style="margin-bottom:14px">Publieksprofiel</div>
           <div class="detail-row"><span class="detail-label">Nieuw publiek</span><span class="detail-value">28%</span></div>
           <div class="detail-row"><span class="detail-label">Terugkerend</span><span class="detail-value">72%</span></div>
           <div class="detail-row"><span class="detail-label">Top genre-affiniteit</span><span class="detail-value">${p.genre} (84%)</span></div>
-          <div class="detail-row"><span class="detail-label">PWYW gemiddelde</span><span class="detail-value">Niveau 3 / 5 (EUR 18,40)</span></div>
           <div class="detail-row"><span class="detail-label">Leeftijd &lt;26</span><span class="detail-value">34%</span></div>
           <div class="detail-row"><span class="detail-label">Brussel (lokaal)</span><span class="detail-value">58%</span></div>
         </div>
+      </div>
+      <div class="grid-2" style="margin-top:16px">
+        <div class="card"><div class="section-title" style="margin-bottom:14px">Verkoopkanalen</div>
+          ${[{l:'Online (kaaitheater.be)',v:64},{l:'Kassa / telefoon',v:18},{l:'Groepsverkoop',v:8},{l:'Partnerverkoop',v:6},{l:'UiTPAS kansentarief',v:4}].map(d=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="width:160px;font-size:13px;color:var(--ink);flex-shrink:0">${d.l}</span><div style="flex:1;height:6px;background:#EAECF0;border-radius:3px;overflow:hidden"><div style="height:100%;width:${d.v}%;background:var(--accent);border-radius:3px"></div></div><span style="width:36px;text-align:right;font-size:13px;font-weight:600">${d.v}%</span></div>`).join('')}
+        </div>
+        <div class="card"><div class="section-title" style="margin-bottom:14px">PWYW-verdeling deze productie</div>
+          ${[{l:'Niveau 1 (EUR 7)',v:14},{l:'Niveau 2 (EUR 12)',v:20},{l:'Niveau 3 (EUR 18)',v:34},{l:'Niveau 4 (EUR 25)',v:22},{l:'Niveau 5 (EUR 35)',v:10}].map((d,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="width:130px;font-size:13px;color:var(--ink);flex-shrink:0">${d.l}</span><div style="flex:1;height:6px;background:#EAECF0;border-radius:3px;overflow:hidden"><div style="height:100%;width:${d.v}%;background:${i===2?'var(--accent)':'var(--blue)'};border-radius:3px"></div></div><span style="width:36px;text-align:right;font-size:13px;font-weight:600">${d.v}%</span></div>`).join('')}
+          <div style="margin-top:10px;font-size:12px;color:var(--muted)">Gem. bijdrage: EUR 19,20 — hoger dan seizoensgemiddelde (EUR 18,40)</div>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:16px">
+        <div class="card"><div class="section-title" style="margin-bottom:14px">Vrijkaarten / comps</div>
+          <div class="detail-row"><span class="detail-label">Totaal vrijkaarten</span><span class="detail-value">${guests?guests.guests.length:0} + 4 gezelschap</span></div>
+          <div class="detail-row"><span class="detail-label">Pers</span><span class="detail-value">${guests?guests.guests.filter(g=>g.role==='Pers').length:0}</span></div>
+          <div class="detail-row"><span class="detail-label">VIP / partners</span><span class="detail-value">${guests?guests.guests.filter(g=>g.role==='VIP'||g.role==='Partner').length:0}</span></div>
+          <div class="detail-row"><span class="detail-label">Curatoren</span><span class="detail-value">${guests?guests.guests.filter(g=>g.role==='Curator').length:0}</span></div>
+          <div class="detail-row"><span class="detail-label">Gezelschap (contractueel)</span><span class="detail-value">4</span></div>
+        </div>
+        <div class="card"><div class="section-title" style="margin-bottom:14px">Vergelijking</div>
+          <div style="font-size:13px;color:var(--body);line-height:1.7;margin-bottom:12px">Hoe doet deze productie het vergeleken met vergelijkbare voorstellingen?</div>
+          <div class="detail-row"><span class="detail-label">${p.artist} vorige keer</span><span class="detail-value">380 tickets, 54% bezet</span></div>
+          <div class="detail-row"><span class="detail-label">Gem. ${p.genre.toLowerCase()} dit seizoen</span><span class="detail-value">${pct(DATA.productions.filter(x=>x.genre===p.genre&&x.capacity>0).reduce((a,x)=>a+x.sold,0),DATA.productions.filter(x=>x.genre===p.genre&&x.capacity>0).reduce((a,x)=>a+x.capacity,0))}% bezet</span></div>
+          <div class="detail-row"><span class="detail-label">Gem. alle producties</span><span class="detail-value">${pct(DATA.productions.filter(x=>x.capacity>0).reduce((a,x)=>a+x.sold,0),DATA.productions.filter(x=>x.capacity>0).reduce((a,x)=>a+x.capacity,0))}% bezet</span></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="section-title" style="margin-bottom:14px">Pers & recensies</div>
+        ${p.id===1?[
+          {media:'De Standaard',journalist:'Pieter T\'Jonck',date:'20 apr 2026',sentiment:'Positief',quote:'Indrukwekkende groepschoreografie die het lichaam als landschap herdefiniëert.'},
+          {media:'BRUZZ',journalist:'Charlotte De Somviele',date:'19 apr 2026',sentiment:'Positief',quote:'Stuart op haar best: rauw, teder en onvoorspelbaar.'},
+          {media:'Etcetera',journalist:'Evelyne Coussens',date:'25 apr 2026',sentiment:'Gemengd',quote:'Visueel overweldigend, maar de narratieve lijn verliest soms richting.'},
+        ].map(r=>`<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><span style="font-weight:600;color:var(--ink)">${r.media}</span><span style="color:var(--muted);margin-left:8px">— ${r.journalist}</span></div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="tag tag-${r.sentiment==='Positief'?'green':r.sentiment==='Gemengd'?'amber':'coral'}">${r.sentiment}</span><span style="font-size:11px;color:var(--muted)">${r.date}</span></div>
+          </div>
+          <div style="margin-top:6px;font-size:13px;color:var(--body);font-style:italic;line-height:1.6">"${r.quote}"</div>
+        </div>`).join(''):`<p style="color:var(--muted);font-size:13px">Nog geen recensies beschikbaar.</p>`}
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="section-header"><div class="section-title">Interne notities</div><button class="btn btn-secondary btn-sm">${ICONS.plus} Notitie</button></div>
+        ${p.id===1?[
+          {text:'Extra bar nodig bij pauze — publiek bleef lang hangen in de foyer. Volgende keer 2 tappunten.',by:'Sarah Willems',date:'19 apr 2026'},
+          {text:'Gezelschap zeer tevreden over technische omkadering. Willen terugkomen seizoen 26-27.',by:'Programmatie',date:'19 apr 2026'},
+        ].map(n=>`<div style="padding:12px;background:var(--surface);border-radius:var(--radius-sm);margin-bottom:8px"><div style="font-size:13px;color:var(--ink);line-height:1.6">${n.text}</div><div style="font-size:11px;color:var(--muted);margin-top:6px">${n.by} — ${n.date}</div></div>`).join(''):`<p style="color:var(--muted);font-size:13px">Nog geen notities.</p>`}
       </div>
     </div>
 
@@ -1127,14 +1281,37 @@ function renderContacten() {
 function renderProfiel() {
   const c = DATA.contacts.find(x=>x.id===currentContactId) || DATA.contacts[0];
   const el = $('#screen-profiel');
-  // Determine journey stage
   const stage = c.tickets12m>=5?'Trouw':c.tickets12m>=2?'Terugkerend':c.tickets12m>=1?'Eerste bezoek':'Onbekend';
   const stageColor = {Trouw:'var(--amber)',Terugkerend:'var(--accent)','Eerste bezoek':'var(--blue)',Onbekend:'var(--muted)'}[stage];
-  // Find related productions
   const relatedProds = c.roles.includes('Artiest')||c.roles.includes('Gezelschap') ? DATA.productions.filter(p=>p.artist.toLowerCase().includes(c.name.split(' ')[0].toLowerCase())).slice(0,3) : [];
+  const hasConflicts = c.fields && Object.values(c.fields).some(f=>f.conflict);
+  const sourceNames = {tm:'Ticketmatic',mc:'Mailchimp',yp:'Yesplan',zs:'Zensoft',crm:'Handmatig'};
+
+  // Helper: field row with source attribution
+  function fieldRow(label, fieldKey, fallbackValue) {
+    const f = c.fields && c.fields[fieldKey];
+    if(!f && !fallbackValue) return '';
+    const val = f ? f.value : fallbackValue;
+    const src = f ? DATA.sources.find(s=>s.id===f.source) : null;
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <span style="font-size:13px;color:var(--muted)">${label}</span>
+        <div style="text-align:right">
+          <div style="font-weight:600;color:var(--ink);font-size:13px">${val}</div>
+          ${src?`<div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:3px"><span class="source src-${f.source}"><span class="source-dot"></span>${src.short}</span><span style="font-size:10px;color:var(--muted)">${f.lastSync}</span></div>`:''}
+        </div>
+      </div>
+      ${f&&f.conflict?`<div style="margin-top:8px;padding:8px 12px;background:var(--amber-light);border-radius:var(--radius-sm);font-size:12px;display:flex;align-items:center;gap:8px">
+        <span style="color:var(--amber);font-weight:600">Conflict</span>
+        <span style="color:var(--body)">${sourceNames[f.conflict.source]||f.conflict.source}: "${f.conflict.value}"</span>
+        <span style="color:var(--muted);font-size:11px">— ${f.conflict.reason}</span>
+        <button class="btn btn-secondary btn-sm" style="margin-left:auto;padding:4px 10px;font-size:11px">Oplossen</button>
+      </div>`:''}
+    </div>`;
+  }
 
   el.innerHTML = `
-  <div class="topbar"><div style="display:flex;align-items:center;gap:10px"><button class="btn btn-ghost" onclick="navigate('contacten')">${ICONS.back}</button><h1>${c.name}</h1></div><div class="topbar-actions"><button class="btn btn-secondary btn-sm">Bewerk</button><button class="btn btn-secondary btn-sm">Campagne</button></div></div>
+  <div class="topbar"><div style="display:flex;align-items:center;gap:10px"><button class="btn btn-ghost" onclick="navigate('contacten')">${ICONS.back}</button><h1>${c.name}</h1></div><div class="topbar-actions">${hasConflicts?`<span class="tag tag-amber" style="margin-right:4px">Conflicten</span>`:''}<button class="btn btn-secondary btn-sm">Bewerk</button><button class="btn btn-secondary btn-sm">Campagne</button></div></div>
   <div class="content">
     <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:28px">
       <div class="profile-avatar" style="background:${c.color}">${c.avatar}</div>
@@ -1147,7 +1324,7 @@ function renderProfiel() {
         <div style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap">${c.roles.map(r=>roleTag(r)).join('')}</div>
         <div style="margin-top:10px;display:flex;gap:16px;align-items:center">
           <div class="sources-row">${c.sources.map(s=>sourceTag(s)).join('')}</div>
-          ${c.owner?`<span style="font-size:12px;color:var(--muted);border-left:1px solid var(--border);padding-left:16px">Contacteigenaar: <strong style="color:var(--ink)">${c.owner}</strong></span>`:''}
+          ${c.owner?`<span style="font-size:12px;color:var(--muted);border-left:1px solid var(--border);padding-left:16px">Eigenaar: <strong style="color:var(--ink)">${c.owner}</strong></span>`:''}
         </div>
       </div>
       ${c.tickets12m>0?`<div style="text-align:right">
@@ -1159,18 +1336,20 @@ function renderProfiel() {
 
     <div class="tabs" id="profiel-tabs">
       <button class="tab active" onclick="switchProfielTab('overzicht')">Overzicht</button>
+      <button class="tab" onclick="switchProfielTab('bronnen')">Bronnen & data</button>
       <button class="tab" onclick="switchProfielTab('tijdlijn')">Tijdlijn</button>
       <button class="tab" onclick="switchProfielTab('consent')">GDPR & consent</button>
     </div>
 
+    <!-- TAB: Overzicht -->
     <div id="profiel-tab-overzicht" class="tab-content active">
       <div class="profile-grid">
         <div>
           <div class="card section"><div class="section-title" style="margin-bottom:14px">Contactgegevens</div>
-            <div class="detail-row"><span class="detail-label">E-mail</span><span class="detail-value">${c.email}</span></div>
-            ${c.phone?`<div class="detail-row"><span class="detail-label">Telefoon</span><span class="detail-value">${c.phone}</span></div>`:''}
-            ${c.address?`<div class="detail-row"><span class="detail-label">Adres</span><span class="detail-value">${c.address}</span></div>`:''}
-            ${c.lang?`<div class="detail-row"><span class="detail-label">Taal</span><span class="detail-value">${c.lang}</span></div>`:''}
+            ${fieldRow('E-mail','email',c.email)}
+            ${fieldRow('Telefoon','phone',c.phone)}
+            ${fieldRow('Adres','address',c.address)}
+            ${fieldRow('Taal','lang',c.lang)}
           </div>
           ${c.tickets12m>0?`<div class="card section"><div class="section-title" style="margin-bottom:14px">Bezoekprofiel</div>
             ${c.since?`<div class="detail-row"><span class="detail-label">Eerste bezoek</span><span class="detail-value">${c.since}</span></div>`:''}
@@ -1191,16 +1370,65 @@ function renderProfiel() {
       </div>
     </div>
 
+    <!-- TAB: Bronnen & data (NIEUW) -->
+    <div id="profiel-tab-bronnen" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:16px">Gekoppelde systemen</div>
+          ${c.sources.map(sid=>{
+            const src = DATA.sources.find(s=>s.id===sid);
+            return src?`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+              <div class="sync-icon" style="background:${src.color};width:32px;height:32px;font-size:11px">${src.short}</div>
+              <div style="flex:1"><div style="font-weight:600;color:var(--ink);font-size:13px">${src.name}</div><div style="font-size:11px;color:var(--muted)">${src.desc}</div></div>
+              <span class="tag tag-green">Verbonden</span>
+            </div>`:'';
+          }).join('')}
+          ${c.sources.length<4?`<div style="padding:12px 0;font-size:12px;color:var(--muted)">${4-c.sources.length} systemen niet gekoppeld aan dit contact</div>`:''}
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-bottom:16px">Data per veld</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Per veld wordt getoond welk systeem de bron is en wanneer het laatst gesynchroniseerd is.</div>
+          ${c.fields?Object.entries(c.fields).map(([key,f])=>{
+            const src = DATA.sources.find(s=>s.id===f.source);
+            const label = {email:'E-mail',phone:'Telefoon',address:'Adres',lang:'Taal'}[key]||key;
+            return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:12px;color:var(--muted)">${label}</span>
+                <div style="display:flex;align-items:center;gap:6px">
+                  ${src?`<span class="source src-${f.source}"><span class="source-dot"></span>${src.short}</span>`:''}<span style="font-size:10px;color:var(--muted)">${f.lastSync}</span>
+                </div>
+              </div>
+              <div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:2px">${f.value}</div>
+              ${f.conflict?`<div style="margin-top:6px;padding:6px 10px;background:var(--amber-light);border-radius:var(--radius-sm);display:flex;align-items:center;gap:6px;font-size:11px">
+                <span style="color:var(--amber);font-weight:600">Conflict:</span>
+                <span>${sourceNames[f.conflict.source]}: "${f.conflict.value}"</span>
+                <button class="btn btn-secondary btn-sm" style="margin-left:auto;padding:3px 8px;font-size:10px">Oplossen</button>
+              </div>`:''}
+            </div>`;
+          }).join(''):`<p style="font-size:13px;color:var(--muted)">Geen veld-level brondata beschikbaar voor dit contact.</p>`}
+        </div>
+      </div>
+      ${hasConflicts?`<div class="card" style="margin-top:16px;background:var(--amber-light);border-color:#F0D9A0">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:14px;font-weight:600;color:#A87314">Dit contact heeft data-conflicten</div>
+          <span style="font-size:13px;color:#A87314">Verschillende systemen geven tegenstrijdige informatie. Los dit op om datakwaliteit te garanderen.</span>
+          <button class="btn btn-primary btn-sm" style="margin-left:auto;background:#A87314">Alle conflicten oplossen</button>
+        </div>
+      </div>`:''}
+    </div>
+
+    <!-- TAB: Tijdlijn -->
     <div id="profiel-tab-tijdlijn" class="tab-content">
       <div class="card">
         ${c.timeline?c.timeline.map(t=>{
           const dotColor = t.source==='tm'?'#FF6B00':t.source==='mc'?'#F5A623':t.source==='crm'?'var(--accent)':'var(--muted)';
-          const sourceLabel = {tm:'Ticketmatic',mc:'Mailchimp',crm:'CRM',yp:'Yesplan'}[t.source]||t.source;
-          return `<div class="tl-item"><div class="tl-dot" style="background:${dotColor}"></div><div style="flex:1"><div class="tl-title">${t.title}</div><div class="tl-date">${t.date}${t.by?` — ${t.by}`:''}</div></div><span style="font-size:11px;color:var(--muted)">${sourceLabel}</span></div>`;
+          const srcLabel = sourceNames[t.source]||t.source;
+          return `<div class="tl-item"><div class="tl-dot" style="background:${dotColor}"></div><div style="flex:1"><div class="tl-title">${t.title}</div><div class="tl-date">${t.date}${t.by?` — ${t.by}`:''}</div></div><span style="font-size:11px;color:var(--muted)">${srcLabel}</span></div>`;
         }).join(''):`<p style="color:var(--muted);font-size:13px;padding:20px 0">Geen activiteit beschikbaar voor dit contact.</p>`}
       </div>
     </div>
 
+    <!-- TAB: GDPR -->
     <div id="profiel-tab-consent" class="tab-content">
       <div class="card">
         <div class="section-title" style="margin-bottom:16px">Toestemming per kanaal</div>
