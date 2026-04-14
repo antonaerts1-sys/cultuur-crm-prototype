@@ -1,0 +1,2198 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cultuur CRM — Deelplatform</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1A1A2E;--body:#4A4A68;--muted:#9CA3AF;
+  --accent:#1DA882;--accent-light:#ECFDF5;--accent-dark:#178F6F;
+  --coral:#EF4444;--coral-light:#FEF2F2;
+  --amber:#F59E0B;--amber-light:#FFFBEB;
+  --blue:#3B82F6;--blue-light:#EFF6FF;
+  --purple:#8B5CF6;--purple-light:#F5F3FF;
+  --bg:#FFFFFF;--surface:#F9FAFB;--border:#F0F0F5;
+  --sidebar-bg:#FFFFFF;--sidebar-text:#6B7280;--sidebar-active:#1A1A2E;
+  --radius:12px;--radius-sm:8px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif;font-size:14px;line-height:1.6;color:var(--body);background:var(--surface);-webkit-font-smoothing:antialiased}
+.app{display:flex;height:100vh}
+
+/* ── Sidebar ── */
+.sidebar{width:260px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;color:var(--sidebar-text);overflow-y:auto}
+.sidebar-logo{padding:28px 24px 24px;display:flex;align-items:center;gap:12px}
+.logo-mark{width:36px;height:36px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:20px;height:20px}
+.logo-text{font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-0.03em}
+.logo-text span{font-weight:500;color:var(--muted);font-size:11px;display:block;margin-top:2px;letter-spacing:0;text-transform:none}
+.sidebar-section{padding:0 12px;margin-bottom:4px}
+.sidebar-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:20px 12px 8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);color:var(--sidebar-text);font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--surface);color:var(--sidebar-active)}
+.nav-item.active{background:var(--accent-light);color:var(--accent);font-weight:600}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;opacity:.5}
+.nav-item:hover svg{opacity:.7}
+.nav-item.active svg{opacity:1}
+.nav-count{margin-left:auto;font-size:11px;background:var(--surface);padding:2px 8px;border-radius:999px;font-weight:600;color:var(--muted)}
+.sidebar-footer{padding:20px 24px;margin-top:auto;border-top:1px solid var(--border)}
+.sidebar-org{font-size:14px;font-weight:600;color:var(--ink)}
+.sidebar-season{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── Main ── */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;background:var(--surface)}
+.topbar{padding:24px 40px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;flex-shrink:0}
+.topbar h1{font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-0.03em}
+.topbar-sub{font-size:13px;color:var(--muted);margin-top:3px;font-weight:400}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.content{padding:32px 40px;flex:1}
+
+/* ── Components ── */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:28px}
+.btn{border-radius:var(--radius-sm);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:-0.01em;display:inline-flex;align-items:center;gap:6px}
+.btn svg{width:14px;height:14px}
+.btn-sm svg{width:13px;height:13px}
+td svg{width:14px;height:14px}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--accent);color:white;border:none}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-secondary{background:white;color:var(--ink);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:#D1D5DB;background:var(--surface)}
+.btn-sm{padding:8px 14px;font-size:12px}
+.btn-ghost{background:none;border:none;color:var(--muted);padding:8px 10px}
+.btn-ghost:hover{color:var(--ink);transform:none}
+.input{border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;font-family:inherit;color:var(--ink);width:100%;outline:none;background:var(--bg);transition:border-color .15s}
+.input:focus{border-color:var(--accent)}
+.input::placeholder{color:#C4C9D2}
+select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%239CA3AF' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+
+/* Tags */
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.01em}
+.tag-default{background:var(--surface);color:var(--body);border:1px solid var(--border)}
+.tag-green{background:var(--accent-light);color:#137D5F}
+.tag-coral{background:var(--coral-light);color:#C43D49}
+.tag-blue{background:var(--blue-light);color:#1A5FB4}
+.tag-amber{background:var(--amber-light);color:#A87314}
+.tag-purple{background:var(--purple-light);color:#6D28D9}
+.tag+.tag{margin-left:3px}
+
+/* Source dots */
+.source{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600}
+.source-dot{width:7px;height:7px;border-radius:50%}
+.src-tm{color:#FF6B00}.src-tm .source-dot{background:#FF6B00}
+.src-mc{color:#F5A623}.src-mc .source-dot{background:#F5A623}
+.src-yp{color:#4CAF50}.src-yp .source-dot{background:#4CAF50}
+.src-zs{color:#9C27B0}.src-zs .source-dot{background:#9C27B0}
+.sources-row{display:flex;gap:10px}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:8px}
+.stat-value{font-size:32px;font-weight:700;letter-spacing:-0.03em;color:var(--ink)}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:4px;font-weight:400}
+
+/* Tables */
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface)}
+td{padding:16px 18px;border-bottom:1px solid var(--border);font-size:13px}
+tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer;transition:background .1s}
+tbody tr:hover td{background:var(--surface)}
+.contact-name{font-weight:600;color:var(--ink);font-size:14px}
+.contact-email{color:var(--muted);font-size:12px;margin-top:2px}
+
+/* Sections */
+.section{margin-bottom:24px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-size:16px;font-weight:600;color:var(--ink);letter-spacing:-0.02em}
+
+/* Screens */
+.screen{display:none}
+.screen.active{display:flex;flex-direction:column;height:100%}
+
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px}
+.tab{padding:12px 24px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Activity feed */
+.act-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.act-item:last-child{border-bottom:none}
+.act-icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.act-icon svg{width:14px;height:14px}
+.act-title{font-weight:600;color:var(--ink);font-size:13px}
+.act-sub{color:var(--muted);font-size:12px;margin-top:2px}
+.act-time{margin-left:auto;color:var(--muted);font-size:12px;white-space:nowrap;font-weight:400}
+
+/* Profile */
+.profile-avatar{width:56px;height:56px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:white;flex-shrink:0}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.detail-row:last-child{border-bottom:none}
+.detail-label{color:var(--muted);font-weight:400}
+.detail-value{font-weight:600;color:var(--ink);text-align:right}
+
+/* Timeline */
+.tl-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.tl-item:last-child{border-bottom:none}
+.tl-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.tl-title{font-size:13px;font-weight:600;color:var(--ink)}
+.tl-date{font-size:12px;color:var(--muted);margin-top:2px;font-weight:400}
+
+/* Filters */
+.filters-bar{display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.filters-bar .input{max-width:300px}
+
+/* Progress bar */
+.progress{height:6px;background:#EAECF0;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .3s}
+
+/* Grid layouts */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.grid-23{display:grid;grid-template-columns:2fr 1fr;gap:24px}
+
+/* Production cards */
+.prod-card{cursor:pointer;transition:all .15s}
+.prod-card:hover{border-color:#D1D5DB}
+.prod-genre{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.prod-title{font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin:8px 0 4px}
+.prod-artist{font-size:14px;color:var(--muted);font-weight:400}
+.prod-meta{display:flex;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+.prod-meta strong{color:var(--ink)}
+
+/* Campaign cards */
+.campaign-card .cs-label{font-size:11px;color:var(--muted);font-weight:500}
+.campaign-card .cs-val{font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-top:4px}
+.campaign-stats{display:flex;gap:24px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* Segment builder */
+.rule-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.rule-row select,.rule-row input[type="text"]{border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:13px;font-family:inherit;color:var(--ink);background:var(--bg);outline:none}
+.rule-row select:focus,.rule-row input:focus{border-color:var(--accent)}
+.rule-row select{min-width:160px}
+.rule-connector{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;padding:6px 0}
+
+/* Sync rows */
+.sync-row{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--border)}
+.sync-row:last-child{border-bottom:none}
+.sync-icon{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:white;flex-shrink:0}
+.sync-name{font-weight:600;color:var(--ink);font-size:14px}
+.sync-meta{font-size:12px;color:var(--muted)}
+.sync-right{margin-left:auto;text-align:right}
+
+/* Toggle */
+.toggle{width:44px;height:24px;border-radius:12px;background:#D1D5DB;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--accent)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:white;transition:transform .2s}
+.toggle.on::after{transform:translateX(20px)}
+
+/* Consent row */
+.consent-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);font-size:13px}
+.consent-row:last-child{border-bottom:none}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,20,25,.5);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg);border-radius:12px;width:90%;max-width:600px;max-height:85vh;overflow-y:auto;padding:28px}
+.modal h2{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:16px}
+
+/* Benchmark bars */
+.bench-row{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+.bench-row:last-child{border-bottom:none}
+.bench-label{width:200px;font-size:14px;font-weight:500;color:var(--ink);flex-shrink:0}
+.bench-bar{flex:1;height:20px;background:var(--surface);border-radius:4px;position:relative;overflow:hidden}
+.bench-fill{height:100%;border-radius:4px;position:absolute;top:0;left:0}
+.bench-val{width:50px;text-align:right;font-size:13px;font-weight:700;color:var(--ink)}
+.bench-avg{position:absolute;top:0;height:100%;width:2px;background:var(--coral);z-index:1}
+
+/* Responsive */
+/* Tags fine-tuning */
+.tag{padding:3px 10px;border-radius:6px;font-size:12px;font-weight:500}
+
+@media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr)}.grid-2,.grid-3,.grid-23,.profile-grid{grid-template-columns:1fr}}
+@media(max-width:768px){.sidebar{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ════════════════════ SIDEBAR ════════════════════ -->
+<aside class="sidebar" id="sidebar"></aside>
+
+<!-- ════════════════════ MAIN ════════════════════ -->
+<div class="main">
+  <div id="screen-dashboard" class="screen active"></div>
+  <div id="screen-producties" class="screen"></div>
+  <div id="screen-productie-detail" class="screen"></div>
+  <div id="screen-contacten" class="screen"></div>
+  <div id="screen-profiel" class="screen"></div>
+  <div id="screen-segmentatie" class="screen"></div>
+  <div id="screen-campagnes" class="screen"></div>
+  <div id="screen-campagne-detail" class="screen"></div>
+  <div id="screen-rapportage" class="screen"></div>
+  <div id="screen-gastenlijsten" class="screen"></div>
+  <div id="screen-sync" class="screen"></div>
+  <div id="screen-instellingen" class="screen"></div>
+  <div id="screen-journey" class="screen"></div>
+  <div id="screen-fundraising" class="screen"></div>
+  <div id="screen-vrijwilligers" class="screen"></div>
+  <div id="screen-toegankelijkheid" class="screen"></div>
+  <div id="screen-automatisering" class="screen"></div>
+  <div id="screen-locaties" class="screen"></div>
+  <div id="screen-lidmaatschap" class="screen"></div>
+  <div id="screen-cooperatie" class="screen"></div>
+  <div id="screen-benchmarks" class="screen"></div>
+</div>
+</div>
+
+<!-- ════════════════════ MODAL ════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+// DATA LAYER
+// ════════════════════════════════════════════════════
+
+const DATA = {
+  org: { name: 'Kaaitheater vzw', season: '2025 – 2026', city: 'Brussel' },
+
+  stats: {
+    totalContacts: 14328, activeVisitors: 3847, newsletter: 8912,
+    lastCampaignRate: 42.3, lastCampaignName: 'Seizoensbrochure',
+    ticketsSold: 42180, noShowRate: 7.8, newVisitorPct: 32
+  },
+
+  sources: [
+    { id:'tm', name:'Ticketmatic', short:'TM', color:'#FF6B00', contacts:11204, desc:'Ticketverkoop & vrijkaarten', lastSync:'14 apr 2026, 10:32', status:'Actief' },
+    { id:'mc', name:'Mailchimp', short:'MC', color:'#F5A623', contacts:8912, desc:'Nieuwsbrieven & direct mails', lastSync:'14 apr 2026, 10:30', status:'Actief' },
+    { id:'yp', name:'Yesplan', short:'YP', color:'#4CAF50', contacts:2341, desc:'Planning productie & techniek', lastSync:'14 apr 2026, 09:15', status:'Actief' },
+    { id:'zs', name:'Zensoft', short:'ZS', color:'#9C27B0', contacts:1876, desc:'Boekhouding & facturatie', lastSync:'13 apr 2026, 18:00', status:'Actief' }
+  ],
+
+  genres: ['Dans','Theater','Performance','Conversatie','Muziek','Film'],
+  genreColors: {Dans:'coral',Theater:'blue',Performance:'purple',Conversatie:'amber',Muziek:'green',Film:'default'},
+
+  productions: [
+    { id:1, title:'BEAST', artist:'Meg Stuart / Damaged Goods', genre:'Dans', dates:'18-19 apr 2026', venue:'GC De Kriekelaar', capacity:300, sold:264, price:'PWYW', status:'In verkoop', yesplanId:'YP-2026-041', description:'Een nieuw groepswerk dat de grens tussen menselijk en dierlijk verkent.' },
+    { id:2, title:'The Goldberg Variations', artist:'Anne Teresa De Keersmaeker / Rosas', genre:'Dans', dates:'2-4 mei 2026', venue:'KVS', capacity:500, sold:500, price:'PWYW', status:'Uitverkocht', yesplanId:'YP-2026-052' },
+    { id:3, title:'All That Is Wrong', artist:'Jan Martens', genre:'Dans', dates:'16-17 mei 2026', venue:'KVS', capacity:500, sold:342, price:'PWYW', status:'In verkoop', yesplanId:'YP-2026-055' },
+    { id:4, title:'No Title Yet', artist:'Forced Entertainment', genre:'Performance', dates:'23 mei 2026', venue:'Kaaistudio\'s', capacity:200, sold:167, price:'PWYW', status:'In verkoop', yesplanId:'YP-2026-058' },
+    { id:5, title:'Antigone', artist:'FC Bergman', genre:'Theater', dates:'30-31 mei 2026', venue:'Theatre National', capacity:800, sold:389, price:'PWYW', status:'In verkoop', yesplanId:'YP-2026-061' },
+    { id:6, title:'Bodies in Crisis', artist:'Eleanor Bauer', genre:'Conversatie', dates:'22 apr 2026', venue:'Kaaistudio\'s — Foyer', capacity:80, sold:62, price:'Gratis', status:'Inschrijving open', yesplanId:'YP-2026-043' },
+    { id:7, title:'soft skin', artist:'Cherish Menzo', genre:'Dans', dates:'25-26 apr 2026', venue:'Kaaistudio\'s', capacity:200, sold:178, price:'PWYW', status:'In verkoop', yesplanId:'YP-2026-045' },
+    { id:8, title:'Re:Rosas', artist:'Rosas', genre:'Dans', dates:'8 jun 2026', venue:'Saincteletteplein (openlucht)', capacity:0, sold:0, price:'Gratis', status:'Geprogrammeerd', yesplanId:'YP-2026-070' },
+    { id:9, title:'Looking Back', artist:'Needcompany', genre:'Theater', dates:'6-7 jun 2026', venue:'KVS', capacity:500, sold:201, price:'PWYW', status:'In verkoop', yesplanId:'YP-2026-068' },
+    { id:10, title:'Foyer Matinee: Spring Edition', artist:'Diverse artiesten', genre:'Dans', dates:'Elke za apr-mei', venue:'Kaaistudio\'s — Foyer', capacity:60, sold:0, price:'Gratis', status:'Lopend', yesplanId:'YP-2026-SAT' },
+    { id:11, title:'The Statement', artist:'Alexander Vantournhout', genre:'Performance', dates:'9-10 mei 2026', venue:'Kaaistudio\'s', capacity:200, sold:200, price:'PWYW', status:'Uitverkocht', yesplanId:'YP-2026-053' },
+    { id:12, title:'How to Be Many? — Panel', artist:'Kaaitheater', genre:'Conversatie', dates:'14 jun 2026', venue:'Kaaistudio\'s — Foyer', capacity:80, sold:34, price:'Gratis', status:'Inschrijving open', yesplanId:'YP-2026-075' },
+  ],
+
+  contacts: [
+    { id:1, name:'Marie Vandenberghe', email:'marie.vdb@gmail.com', roles:['Bezoeker','Nieuwsbrief'], sources:['tm','mc'], lastInteraction:'12 apr 2026', tickets12m:7, phone:'+32 476 12 34 56', address:'Dansaertstraat 42, 1000 Brussel', lang:'NL', since:'14/09/2021', spent:168, pref:['Dans','Performance'], consent:{newsletter:{status:'opt-in',since:'12/01/2023'},promo:{status:'opt-in',since:'12/01/2023'},service:{status:'opt-in',since:'14/09/2021'}}, avatar:'MV', color:'var(--accent)', owner:'Jonas Maes',
+      timeline:[
+        {type:'ticket',title:'Ticket gekocht — Meg Stuart / BEAST',date:'12 apr 2026',source:'tm'},
+        {type:'email',title:'E-mail geopend — Herinnering Meg Stuart',date:'10 apr 2026',source:'mc'},
+        {type:'ticket',title:'Ticket gekocht — Anne Teresa De Keersmaeker',date:'18 mrt 2026',source:'tm'},
+        {type:'email',title:'Nieuwsbrief geopend — Voorjaarsprogramma',date:'2 mrt 2026',source:'mc'},
+        {type:'ticket',title:'Ticket gekocht — Jan Martens',date:'14 feb 2026',source:'tm'},
+        {type:'email',title:'E-mail geklikt — Valentijnsactie dans',date:'8 feb 2026',source:'mc'},
+        {type:'ticket',title:'Ticket gekocht — Forced Entertainment',date:'22 jan 2026',source:'tm'},
+        {type:'note',title:'Notitie: Sprak Marie na de voorstelling. Geinteresseerd in seizoensabonnement.',date:'22 jan 2026',source:'crm',by:'Jonas Maes'},
+      ]
+    },
+    { id:2, name:'Needcompany vzw', email:'productie@needcompany.org', roles:['Gezelschap','Coproducent'], sources:['yp','zs'], lastInteraction:'8 apr 2026', tickets12m:0, phone:'+32 2 219 60 60', address:'Koopliedenstraat 17, 1000 Brussel', lang:'NL/EN', avatar:'NC', color:'var(--blue)', owner:'Programmatie' },
+    { id:3, name:'Thomas De Smedt', email:'thomas@textualcreatures.com', roles:['Artiest','Bezoeker'], sources:['yp','mc'], lastInteraction:'3 apr 2026', tickets12m:3, avatar:'TD', color:'var(--purple)', owner:'Programmatie' },
+    { id:4, name:'Sophie Janssens', email:'sophie.j@hotmail.com', roles:['Bezoeker','Trouwe bezoeker','Vrijwilliger'], sources:['tm','mc','zs'], lastInteraction:'1 apr 2026', tickets12m:12, avatar:'SJ', color:'var(--coral)', owner:'Titane Michiels' },
+    { id:5, name:'De Morgen — Cultuurredactie', email:'cultuur@demorgen.be', roles:['Pers'], sources:['mc'], lastInteraction:'28 mrt 2026', tickets12m:0, avatar:'DM', color:'var(--amber)', owner:'Mara Ittel' },
+    { id:6, name:'KVS', email:'info@kvs.be', roles:['Partner','Gastlocatie'], sources:['yp','zs'], lastInteraction:'25 mrt 2026', tickets12m:0, avatar:'KV', color:'var(--blue)', owner:'Programmatie' },
+    { id:7, name:'Pieter Claessens', email:'pieter.c@live.be', roles:['Bezoeker'], sources:['tm'], lastInteraction:'22 mrt 2026', tickets12m:2, avatar:'PC', color:'var(--accent)', owner:null },
+    { id:8, name:'Rosas vzw', email:'admin@rosas.be', roles:['Gezelschap','Coproducent','Partner'], sources:['yp','tm','zs'], lastInteraction:'18 mrt 2026', tickets12m:0, avatar:'RO', color:'var(--coral)', owner:'Programmatie' },
+    { id:9, name:'BRUZZ', email:'cultuur@bruzz.be', roles:['Pers'], sources:['mc'], lastInteraction:'15 mrt 2026', tickets12m:0, avatar:'BR', color:'var(--amber)', owner:'Mara Ittel' },
+    { id:10, name:'Meg Stuart', email:'meg@damagedgoods.be', roles:['Artiest'], sources:['yp'], lastInteraction:'10 apr 2026', tickets12m:0, avatar:'MS', color:'var(--purple)', owner:'Programmatie' },
+    { id:11, name:'Charleroi danse', email:'info@charleroi-danse.be', roles:['Partner','Gastlocatie'], sources:['yp'], lastInteraction:'5 mrt 2026', tickets12m:0, avatar:'CD', color:'var(--blue)', owner:'Productie' },
+    { id:12, name:'Elena Kowalski', email:'elena.k@gmail.com', roles:['Bezoeker','Nieuwsbrief','Donor'], sources:['tm','mc'], lastInteraction:'8 apr 2026', tickets12m:9, avatar:'EK', color:'var(--accent)', owner:null },
+    { id:13, name:'Ahmed El-Mansouri', email:'ahmed.em@outlook.be', roles:['Bezoeker','Vrijwilliger'], sources:['tm','mc'], lastInteraction:'30 mrt 2026', tickets12m:4, avatar:'AE', color:'var(--accent)', owner:'Jonas Maes' },
+    { id:14, name:'Théâtre National', email:'info@theatrenational.be', roles:['Partner','Gastlocatie'], sources:['yp','zs'], lastInteraction:'20 mrt 2026', tickets12m:0, avatar:'TN', color:'var(--blue)', owner:'Productie' },
+    { id:15, name:'Laura Vranckx', email:'laura.v@kuleuven.be', roles:['Curator','Bezoeker'], sources:['mc','tm'], lastInteraction:'2 apr 2026', tickets12m:5, avatar:'LV', color:'var(--purple)', owner:'Programmatie' },
+  ],
+
+  campaigns: [
+    { id:1, name:'Herinnering: Meg Stuart / BEAST', segment:'Dansbezoekers afgelopen 2 jaar', status:'Verstuurd', statusClass:'green', recipients:1204, openRate:42.3, clickRate:8.1, tickets:47, date:'10 apr 2026', production:1, abTest:{a:'Mis Meg Stuart niet',b:'BEAST — Laatste tickets',winnerA:true,openA:44.1,openB:40.5} },
+    { id:2, name:'Voorjaarsprogramma 2026', segment:'Alle nieuwsbrief abonnees', status:'Verstuurd', statusClass:'green', recipients:8847, openRate:36.1, clickRate:5.4, tickets:312, date:'1 mrt 2026', production:null },
+    { id:3, name:'Uitnodiging: Openingsweekend nieuw gebouw', segment:'Trouwe bezoekers + partners + pers', status:'Gepland', statusClass:'blue', recipients:735, openRate:null, clickRate:null, tickets:null, date:'28 apr 2026', production:null },
+    { id:4, name:'Re-engagement: Inactieve bezoekers', segment:'Geen bezoek >12m, ooit 3+ tickets', status:'Concept', statusClass:'default', recipients:943, openRate:null, clickRate:null, tickets:null, date:null, production:null },
+    { id:5, name:'Servicemail: Forced Entertainment', segment:'Tickethouders No Title Yet', status:'Gepland', statusClass:'blue', recipients:167, openRate:null, clickRate:null, tickets:null, date:'20 mei 2026', production:4, isService:true },
+  ],
+
+  segments: [
+    { name:'Trouwe bezoekers (5+ tickets/jaar)', desc:'Alle genres, actief afgelopen 12 maanden', count:612, lastUsed:'10 apr 2026', trend:'+18' },
+    { name:'Nieuwsbrief — inactief (3+ maanden)', desc:'Ingeschreven maar niet geopend', count:1847, lastUsed:'5 apr 2026', trend:'+124' },
+    { name:'Pers — NL-talige media', desc:'Journalisten cultuurredacties NL/EN', count:89, lastUsed:'28 mrt 2026', trend:'0' },
+    { name:'Partners & coproducenten', desc:'Theaters en organisaties', count:34, lastUsed:'15 mrt 2026', trend:'+2' },
+    { name:'Jongeren (<26 jaar)', desc:'Publieksopbouw doelgroep', count:1203, lastUsed:'1 mrt 2026', trend:'+87' },
+    { name:'Dansbezoekers zonder nieuwsbrief', desc:'3+ danstickets, geen opt-in', count:284, lastUsed:'8 apr 2026', trend:'-12' },
+    { name:'Churn-risico', desc:'Frequentie dalend, 50%+ minder dan vorig seizoen', count:156, lastUsed:'12 apr 2026', trend:'+31' },
+    { name:'PWYW laagste niveau + frequent', desc:'Structureel laagste prijs, 4+ bezoeken', count:203, lastUsed:'1 apr 2026', trend:'+15' },
+  ],
+
+  guestLists: [
+    { productionId:1, guests:[
+      {name:'Sophie Vanlessen',role:'VIP',status:'Bevestigd'},{name:'Jan Decorte',role:'Curator',status:'Uitgenodigd'},
+      {name:'Pieter T\'Jonck — De Standaard',role:'Pers',status:'Bevestigd'},{name:'Evelyne Coussens — Etcetera',role:'Pers',status:'Uitgenodigd'},
+      {name:'KVS — Michael De Cock',role:'Partner',status:'Bevestigd'},{name:'Anne Teresa De Keersmaeker',role:'Artiest',status:'Uitgenodigd'},
+      {name:'Frie Leysen',role:'Curator',status:'Bevestigd'},{name:'Charlotte De Somviele — BRUZZ',role:'Pers',status:'Bevestigd'},
+    ]},
+  ],
+
+  syncLog: [
+    { source:'Ticketmatic', time:'14 apr 2026, 10:32', contacts:247, status:'ok', msg:'247 contacten bijgewerkt, 3 nieuwe' },
+    { source:'Mailchimp', time:'14 apr 2026, 10:30', contacts:18, status:'ok', msg:'18 contacten bijgewerkt' },
+    { source:'Yesplan', time:'14 apr 2026, 09:15', contacts:5, status:'ok', msg:'5 productie-contacten bijgewerkt' },
+    { source:'Zensoft', time:'13 apr 2026, 18:00', contacts:12, status:'warn', msg:'12 contacten bijgewerkt, 2 conflicten' },
+  ],
+
+  duplicates: [
+    { a:'M. Vandenberge (Mailchimp)', b:'Marie Vandenberghe (Ticketmatic)', confidence:94, field:'naam + postcode match' },
+    { a:'info@rosas.be (Yesplan)', b:'admin@rosas.be (Zensoft)', confidence:87, field:'organisatie match' },
+    { a:'P. Claessens (Ticketmatic)', b:'Pieter Claessens (Zensoft)', confidence:91, field:'naam + gemeente match' },
+  ],
+
+  benchmarks: {
+    communicatie: [
+      { label:'Open rate nieuwsbrief', ours:38.7, sector:28.0, unit:'%' },
+      { label:'Click rate campagnes', ours:6.2, sector:3.8, unit:'%' },
+      { label:'Unsubscribe rate', ours:0.3, sector:0.8, unit:'%', lowerBetter:true },
+      { label:'Campagne-naar-ticket conversie', ours:3.9, sector:2.1, unit:'%' },
+    ],
+    publiek: [
+      { label:'Bezettingsgraad', ours:78.4, sector:71.2, unit:'%' },
+      { label:'No-show rate', ours:7.8, sector:12.1, unit:'%', lowerBetter:true },
+      { label:'Nieuw publiek', ours:32, sector:24, unit:'%' },
+      { label:'Retentie (terugkeer volgend seizoen)', ours:31, sector:26, unit:'%' },
+      { label:'Gem. bezoeken per bezoeker', ours:2.4, sector:1.9, unit:'' },
+    ],
+    financieel: [
+      { label:'Gem. ticketprijs (PWYW)', ours:18.4, sector:15.2, unit:' EUR' },
+      { label:'Vriendenkring als % van publiek', ours:4.1, sector:2.8, unit:'%' },
+      { label:'Verlengingsgraad vrienden', ours:72, sector:64, unit:'%' },
+      { label:'Vrijwilligersuren per seizoen', ours:1240, sector:680, unit:'' },
+    ],
+    inclusie: [
+      { label:'Voorstellingen met boventitels', ours:42, sector:28, unit:'%' },
+      { label:'Voorstellingen met gebarentolk', ours:8, sector:5, unit:'%' },
+      { label:'Prikkelarme voorstellingen', ours:4, sector:2, unit:'' },
+      { label:'Bezoekers met toegankelijkheidsnood', ours:2.8, sector:1.9, unit:'%' },
+    ],
+    seizoenen: [
+      { seizoen:'2023-24', bezetting:71, nieuwPubliek:28, openRate:32.1, noShow:11.2 },
+      { seizoen:'2024-25', bezetting:74, nieuwPubliek:30, openRate:35.8, noShow:9.4 },
+      { seizoen:'2025-26', bezetting:78.4, nieuwPubliek:32, openRate:38.7, noShow:7.8 },
+    ]
+  },
+
+  monthlyVisitors: [
+    {m:'Sep',v:4120},{m:'Okt',v:3890},{m:'Nov',v:4310},{m:'Dec',v:3650},{m:'Jan',v:3480},{m:'Feb',v:3920},{m:'Mrt',v:4580},{m:'Apr',v:3200}
+  ],
+
+  coop: {
+    houses: [
+      {name:'Kaaitheater',city:'Brussel',joined:'Sep 2025',status:'Pionier'},
+      {name:'30CC',city:'Leuven',joined:'Nov 2025',status:'Pionier'},
+      {name:'STUK',city:'Leuven',joined:'Jan 2026',status:'Pionier'},
+      {name:'CAMPO',city:'Gent',joined:'Feb 2026',status:'Lid'},
+      {name:'KAAP',city:'Brugge',joined:'Mrt 2026',status:'Lid'},
+      {name:'Nona',city:'Mechelen',joined:'Mrt 2026',status:'Lid'},
+      {name:'Het Depot',city:'Leuven',joined:'Apr 2026',status:'Lid'},
+      {name:'KVS',city:'Brussel',joined:'Apr 2026',status:'Lid'},
+    ],
+    sessions: [
+      {title:'Kick-off: Data-standaarden & OSLO', date:'18 sep 2025', location:'Kaaitheater, Brussel', attendees:8, status:'Afgerond', notes:'Consensus over OSLO-standaarden als basis. Werkgroep opgericht.'},
+      {title:'GDPR & consent-modellen per organisatietype', date:'12 nov 2025', location:'30CC, Leuven', attendees:12, status:'Afgerond', notes:'Verschil stedelijke VZW vs private VZW in kaart gebracht. Template consent-flows opgeleverd.'},
+      {title:'Segmentatie-recepten & publiekswerking', date:'22 jan 2026', location:'STUK, Leuven', attendees:14, status:'Afgerond', notes:'8 gedeelde segmentatie-recepten gedefinieerd. Best practices publiekswerking gedeeld.'},
+      {title:'Roadmap Q3-Q4 2026 & feature-stemming', date:'15 mei 2026', location:'CAMPO, Gent', attendees:0, status:'Gepland'},
+    ],
+    backlog: [
+      {id:1, title:'UiTPAS live sync & kansentarief-integratie', house:'30CC', votes:142, tags:['Ticketing','Participatie']},
+      {id:2, title:'Automatische Kunstendecreet-export (PDF/XML)', house:'STUK', votes:118, tags:['Rapportage','Data']},
+      {id:3, title:'Vrijwilligersportaal met self-service shifts', house:'KAAP', votes:89, tags:['Vrijwilligers','UX']},
+      {id:4, title:'AI seizoensvoorspeller (churn-detectie)', house:'Kaaitheater', votes:76, tags:['AI','Data']},
+      {id:5, title:'Bulk GDPR-consent management', house:'KVS', votes:64, tags:['GDPR','Data']},
+      {id:6, title:'Narrowcasting-feed vanuit productiedossier', house:'Het Depot', votes:52, tags:['UX','Integratie']},
+      {id:7, title:'Multi-taal campagne-templates (NL/FR/EN)', house:'Kaaitheater', votes:48, tags:['Campagnes','UX']},
+      {id:8, title:'Donateursmodule met fiscale attesten', house:'CAMPO', votes:41, tags:['Fundraising','Data']},
+      {id:9, title:'Cross-venue publieksanalyse (geanonimiseerd)', house:'Nona', votes:38, tags:['Data','Benchmarks']},
+      {id:10, title:'Printbare zaalplannen met bezettings-overlay', house:'30CC', votes:29, tags:['UX','Ticketing']},
+    ],
+    roadmap: [
+      {period:'Q3 2025',title:'Kern-CRM',desc:'Contactbeheer, deduplicatie, unified profiel, Ticketmatic + Yesplan sync.',status:'Opgeleverd',color:'var(--accent)'},
+      {period:'Q4 2025',title:'Campagnes & Segmentatie',desc:'E-mail vanuit CRM, segmentatie-builder, A/B testing, funnel tracking.',status:'Opgeleverd',color:'var(--accent)'},
+      {period:'Q1 2026',title:'Rapportage & Dashboards',desc:'Per-productie ROI, Kunstendecreet-export, seizoensoverzichten.',status:'In ontwikkeling',color:'var(--blue)'},
+      {period:'Q2 2026',title:'Cooperatief portaal',desc:'Benchmarks, ideeenbus, co-creatie sessies, governance-tools.',status:'In ontwikkeling',color:'var(--blue)'},
+      {period:'Q3 2026',title:'Hospitality & Vrijwilligers',desc:'Gastenlijstbeheer, vrijwilligersplanning, narrowcasting.',status:'Gepland',color:'var(--amber)'},
+      {period:'Q4 2026',title:'AI & Predictive',desc:'Churn-detectie, automatische segmentsuggesties, prompt-based rapportage.',status:'Gepland',color:'var(--amber)'},
+    ],
+    governance: [
+      {title:'Collectief eigenaarschap',desc:'Elk aangesloten cultuurhuis is mede-eigenaar van het platform. Beslissingen over de roadmap worden genomen op basis van sectorbrede noden, niet door een leverancier.',icon:'users'},
+      {title:'Open standaarden',desc:'We investeren samen in open modules. Wat voor een huis wordt gebouwd, komt ten goede aan het hele collectief. Geen vendor lock-in, data altijd exporteerbaar.',icon:'globe'},
+      {title:'Transparante governance',desc:'Wijzigingen worden gevalideerd door een gebruikersraad van 7 huizen. Referenda voor grote beslissingen. Adviesgroepen voeden met input uit de praktijk.',icon:'check'},
+    ]
+  },
+
+  journey: {
+    stages: [
+      {name:'Eerste bezoek',count:1847,pct:48,color:'var(--blue)',desc:'Eenmalige bezoekers, nog geen terugkeer'},
+      {name:'Terugkerend',count:891,pct:23,color:'var(--accent)',desc:'2-3 bezoeken afgelopen 12 maanden'},
+      {name:'Trouw',count:612,pct:16,color:'var(--amber)',desc:'4+ bezoeken, vaste gast'},
+      {name:'Ambassadeur',count:294,pct:8,color:'var(--purple)',desc:'Brengt anderen mee, deelt op social media'},
+      {name:'Donateur',count:203,pct:5,color:'var(--coral)',desc:'Financiele steun via donatie of vriendenkring'},
+    ],
+    transitions: [
+      {from:'Eerste bezoek',to:'Terugkerend',rate:31,trend:'+2.4%',period:'Seizoen 25-26'},
+      {from:'Terugkerend',to:'Trouw',rate:44,trend:'+5.1%',period:'Seizoen 25-26'},
+      {from:'Trouw',to:'Ambassadeur',rate:28,trend:'-1.2%',period:'Seizoen 25-26'},
+      {from:'Ambassadeur',to:'Donateur',rate:52,trend:'+8.3%',period:'Seizoen 25-26'},
+    ],
+    atRisk: [
+      {name:'Sophie Janssens',stage:'Trouw',risk:'Frequentie -60%',lastVisit:'1 apr 2026'},
+      {name:'Pieter Claessens',stage:'Terugkerend',risk:'Geen bezoek 4 maanden',lastVisit:'22 mrt 2026'},
+    ]
+  },
+
+  fundraising: {
+    summary: {totalDonors:203,totalRaised:34820,avgGift:42,friendsMembers:156},
+    donors: [
+      {name:'Elena Kowalski',type:'Donateur',amount:250,date:'8 apr 2026',recurring:true},
+      {name:'Luc Vermeersch',type:'Mecenas',amount:2500,date:'15 mrt 2026',recurring:false},
+      {name:'Sophie Janssens',type:'Vriend',amount:35,date:'1 feb 2026',recurring:true},
+    ],
+    sponsors: [
+      {name:'Proximus',type:'Hoofdsponsor',amount:15000,contract:'Sep 2025 – Aug 2026',status:'Actief'},
+      {name:'KBC',type:'Sponsor',amount:5000,contract:'Sep 2025 – Aug 2026',status:'Actief'},
+      {name:'Visit.Brussels',type:'Structureel',amount:8000,contract:'2023 – 2027',status:'Actief'},
+    ],
+    grants: [
+      {name:'Kunstendecreet werkingssubsidie',funder:'Vlaamse Overheid',amount:2764800,period:'2023-2027',status:'Actief',deadline:null},
+      {name:'VGC jaarlijkse subsidie',funder:'VGC Brussel',amount:280000,period:'2025',status:'Actief',deadline:null},
+      {name:'Projectsubsidie internationale tournee',funder:'Vlaamse Overheid',amount:45000,period:'2026',status:'Aangevraagd',deadline:'30 jun 2026'},
+    ]
+  },
+
+  vrijwilligers: {
+    stats:{total:47,activeThisSeason:38,totalHours:1240,avgPerEvent:6,retentionRate:78,newThisSeason:9,certEHBO:12,satisfactionScore:8.7},
+    roles: ['Onthaal','Bar','Kassa','Techniek','Opbouw','Horeca','Garderobe','Fotografie','Social media','Chauffeur'],
+    list: [
+      {id:1,name:'Ahmed El-Mansouri',email:'ahmed.em@outlook.be',phone:'+32 478 11 22 33',skills:['Onthaal','Bar'],available:'Weekends',shifts:12,hours:48,lastShift:'12 apr 2026',since:'Sep 2023',status:'Actief',certEHBO:true,notes:'Spreekt AR/NL/FR. Heel betrouwbaar.',tshirtSize:'M',emergencyContact:'Fatima El-Mansouri +32 479 00 11 22',rating:5},
+      {id:2,name:'Lisa De Vos',email:'lisa.devos@gmail.com',phone:'+32 472 33 44 55',skills:['Onthaal','Kassa'],available:'Ma-Vr avonden',shifts:8,hours:32,lastShift:'12 apr 2026',since:'Jan 2024',status:'Actief',certEHBO:false,notes:'Student KU Leuven, zeer enthousiast.',tshirtSize:'S',emergencyContact:'Mark De Vos +32 473 55 66 77',rating:4},
+      {id:3,name:'Tom Peeters',email:'tom.p@telenet.be',phone:'+32 476 55 66 77',skills:['Techniek','Opbouw'],available:'Flexibel',shifts:15,hours:75,lastShift:'10 apr 2026',since:'Sep 2022',status:'Actief',certEHBO:true,notes:'Ervaren geluidstechnicus. Kan zelfstandig werken.',tshirtSize:'L',emergencyContact:'An Peeters +32 477 88 99 00',rating:5},
+      {id:4,name:'Nadia Benali',email:'nadia.b@hotmail.com',phone:'+32 475 77 88 99',skills:['Bar','Horeca'],available:'Weekends',shifts:6,hours:24,lastShift:'25 mrt 2026',since:'Nov 2024',status:'Actief',certEHBO:false,notes:'Barista-ervaring. Kan cocktails.',tshirtSize:'M',emergencyContact:'Karim Benali +32 478 22 33 44',rating:4},
+      {id:5,name:'Jan De Backer',email:'jan.db@telenet.be',phone:'+32 479 88 99 00',skills:['Onthaal'],available:'Flexibel',shifts:4,hours:16,lastShift:'1 mrt 2026',since:'Sep 2024',status:'Inactief',certEHBO:false,notes:'Gepensioneerd. Beschikbaar overdag.',tshirtSize:'XL',emergencyContact:'Marie De Backer +32 470 11 22 33',rating:3},
+      {id:6,name:'Yuki Tanaka',email:'yuki.t@gmail.com',phone:'+32 471 22 33 44',skills:['Fotografie','Social media'],available:'Weekends',shifts:10,hours:40,lastShift:'12 apr 2026',since:'Feb 2025',status:'Actief',certEHBO:false,notes:'Professioneel fotograaf. Levert beelden voor social media.',tshirtSize:'S',emergencyContact:'—',rating:5},
+      {id:7,name:'Koen Willems',email:'koen.w@outlook.be',phone:'+32 474 55 66 77',skills:['Techniek','Opbouw','Chauffeur'],available:'Ma-Vr avonden',shifts:18,hours:90,lastShift:'10 apr 2026',since:'Sep 2021',status:'Actief',certEHBO:true,notes:'Rijbewijs C. Kan materiaal ophalen. Meest ervaren vrijwilliger.',tshirtSize:'XL',emergencyContact:'Sarah Willems +32 475 88 99 00',rating:5},
+      {id:8,name:'Clara Martens',email:'clara.m@student.be',phone:'+32 477 00 11 22',skills:['Onthaal','Garderobe'],available:'Weekends',shifts:3,hours:12,lastShift:'8 mrt 2026',since:'Jan 2026',status:'Actief',certEHBO:false,notes:'Nieuwe vrijwilliger. Nog in opleiding.',tshirtSize:'S',emergencyContact:'Peter Martens +32 478 33 44 55',rating:0},
+    ],
+    upcoming: [
+      {id:1,production:'Meg Stuart / BEAST',productionId:1,date:'18-19 apr 2026',venue:'GC De Kriekelaar',needed:6,filled:4,
+        shifts:[
+          {role:'Onthaal',needed:2,filled:2,volunteers:['Lisa De Vos','Clara Martens'],time:'18:30 – 22:30'},
+          {role:'Bar',needed:2,filled:1,volunteers:['Nadia Benali'],time:'18:00 – 23:00'},
+          {role:'Kassa',needed:1,filled:1,volunteers:['Ahmed El-Mansouri'],time:'18:30 – 20:30'},
+          {role:'Techniek',needed:1,filled:0,volunteers:[],time:'16:00 – 23:30'},
+        ]},
+      {id:2,production:'Cherish Menzo — soft skin',productionId:7,date:'25-26 apr 2026',venue:'Kaaistudio\'s',needed:4,filled:2,
+        shifts:[
+          {role:'Onthaal',needed:2,filled:1,volunteers:['Ahmed El-Mansouri'],time:'19:00 – 22:00'},
+          {role:'Bar',needed:2,filled:1,volunteers:['Nadia Benali'],time:'18:30 – 22:30'},
+        ]},
+      {id:3,production:'Bodies in Crisis — Eleanor Bauer',productionId:6,date:'22 apr 2026',venue:'Kaaistudio\'s — Foyer',needed:2,filled:0,
+        shifts:[
+          {role:'Onthaal',needed:1,filled:0,volunteers:[],time:'19:30 – 21:30'},
+          {role:'Fotografie',needed:1,filled:0,volunteers:[],time:'19:30 – 21:30'},
+        ]},
+      {id:4,production:'Antigone — FC Bergman',productionId:5,date:'30-31 mei 2026',venue:'Theatre National',needed:8,filled:0,
+        shifts:[
+          {role:'Onthaal',needed:2,filled:0,volunteers:[],time:'18:30 – 22:30'},
+          {role:'Bar',needed:2,filled:0,volunteers:[],time:'18:00 – 23:00'},
+          {role:'Kassa',needed:1,filled:0,volunteers:[],time:'18:30 – 20:30'},
+          {role:'Techniek',needed:1,filled:0,volunteers:[],time:'16:00 – 23:30'},
+          {role:'Garderobe',needed:1,filled:0,volunteers:[],time:'18:30 – 22:30'},
+          {role:'Fotografie',needed:1,filled:0,volunteers:[],time:'19:00 – 22:00'},
+        ]},
+    ],
+    pastShifts: [
+      {production:'Mette Ingvartsen — Moving in Concert',date:'28-29 mrt 2026',totalVolunteers:5,totalHours:40,noShows:0,feedback:'Alles vlot verlopen. Publiek bleef lang voor nagesprek.'},
+      {production:'Tim Etchells — Solo Show',date:'14-15 mrt 2026',totalVolunteers:4,totalHours:24,noShows:1,feedback:'Eén no-show bij bar. Clara heeft bijgesprongen.'},
+      {production:'Seizoensopening 2025-2026',date:'12 sep 2025',totalVolunteers:12,totalHours:96,noShows:0,feedback:'Grootste event van het seizoen. Alle rollen ingevuld. Evaluatie zeer positief.'},
+    ],
+    communications: [
+      {subject:'Oproep: Vrijwilligers gezocht voor Antigone (30-31 mei)',date:'14 apr 2026',recipients:47,opens:38,type:'Oproep'},
+      {subject:'Bedankt voor je inzet bij Meg Stuart!',date:'20 apr 2026',recipients:4,opens:4,type:'Bedanking'},
+      {subject:'Herinnering: Shift morgen — soft skin',date:'24 apr 2026',recipients:4,opens:3,type:'Herinnering'},
+    ],
+    training: [
+      {name:'Basisopleiding onthaal & publieksbegeleiding',date:'Sep 2025',attendees:22,status:'Afgerond'},
+      {name:'EHBO-certificaat (Rode Kruis)',date:'Okt 2025',attendees:12,status:'Afgerond'},
+      {name:'Brandveiligheid & evacuatie',date:'Nov 2025',attendees:35,status:'Afgerond'},
+      {name:'Bartraining & hygiëne (FAVV)',date:'Mei 2026',attendees:0,status:'Gepland'},
+    ],
+  },
+
+  toegankelijkheid: {
+    venueMatrix: [
+      {venue:'Grote Zaal',wheelchair:true,hearingLoop:true,wheelchairSeats:8,companionSeats:8,stepFree:true,accessibleWC:true},
+      {venue:'Kaaistudio',wheelchair:true,hearingLoop:false,wheelchairSeats:4,companionSeats:4,stepFree:true,accessibleWC:true},
+      {venue:'Foyer',wheelchair:true,hearingLoop:false,wheelchairSeats:0,companionSeats:0,stepFree:true,accessibleWC:true},
+      {venue:'GC De Kriekelaar',wheelchair:true,hearingLoop:true,wheelchairSeats:6,companionSeats:6,stepFree:false,accessibleWC:true},
+    ],
+    performances: [
+      {title:'BEAST — Meg Stuart',date:'18 apr',signLang:false,audioDesc:false,surtitles:true,sensoryFriendly:false},
+      {title:'The Goldberg Variations',date:'2 mei',signLang:false,audioDesc:true,surtitles:false,sensoryFriendly:false},
+      {title:'Antigone — FC Bergman',date:'30 mei',signLang:true,audioDesc:false,surtitles:true,sensoryFriendly:false},
+      {title:'Foyer Matinee: Spring',date:'za apr-mei',signLang:false,audioDesc:false,surtitles:false,sensoryFriendly:true},
+    ],
+    patronNeeds: {wheelchair:34,hearingAid:18,visualImpair:8,sensory:12,companion:28}
+  },
+
+  automatisering: {
+    workflows: [
+      {name:'Welkom eerste bezoeker',trigger:'Eerste ticket gekocht',action:'Welkomstmail + aanbeveling volgende voorstelling',status:'Actief',sent:847,conversion:'12%'},
+      {name:'Herinnering voorstelling',trigger:'3 dagen voor voorstelling',action:'Servicemail met locatie-info en vervoer',status:'Actief',sent:3240,conversion:'—'},
+      {name:'Na-bezoek feedback',trigger:'1 dag na voorstelling',action:'Korte enquete + bedanking',status:'Actief',sent:2180,conversion:'34% respons'},
+      {name:'Churn preventie',trigger:'Bezoekfrequentie daalt >50%',action:'Persoonlijke mail met gepersonaliseerde suggesties',status:'Actief',sent:156,conversion:'18% terugkeer'},
+      {name:'Donatie-ask trouwe bezoekers',trigger:'Na 5e bezoek in seizoen',action:'Uitnodiging vriendenkring + donatiemogelijkheid',status:'Concept',sent:0,conversion:'—'},
+      {name:'Verjaardag',trigger:'Verjaardagsdatum contact',action:'Felicitatie + kleine korting',status:'Inactief',sent:0,conversion:'—'},
+    ]
+  },
+
+  locaties: [
+    {name:'Saincteletteplein 20',type:'Eigen',capacity:700,city:'Brussel',status:'In renovatie (heropening sep 2027)',events:0,note:'Grote zaal (700) + kleine zaal (200) + foyers. Momenteel gesloten voor grondige renovatie door BULK architecten.'},
+    {name:'Kaaistudio\'s',type:'Eigen',capacity:200,city:'Brussel (Oude Graanmarkt)',status:'Actief — vaste basis tijdens renovatie',events:8,note:'Blackbox 200 plaatsen + foyer 60 plaatsen. Voormalige brouwerij Etoile.'},
+    {name:'GC De Kriekelaar',type:'Partner',capacity:300,city:'Schaarbeek',status:'Actief',events:12,note:'Vaste uitvalsbasis voor grotere producties tijdens de nomadische periode.'},
+    {name:'KVS',type:'Partner',capacity:500,city:'Brussel',status:'Actief',events:4,note:'Bol & Box. Samenwerking voor dansvoorstellingen die een grotere zaal nodig hebben.'},
+    {name:'Theatre National',type:'Partner',capacity:800,city:'Brussel',status:'Actief',events:2,note:'Franstalig partnertheater. Vooral voor grootschalige coproducties.'},
+    {name:'Charleroi danse / La Raffinerie',type:'Partner',capacity:250,city:'Brussel (Molenbeek)',status:'Actief',events:4,note:'Danspartner. Gedeelde producties en try-outs.'},
+    {name:'BOZAR',type:'Partner',capacity:2100,city:'Brussel',status:'Actief',events:1,note:'Henry Le Boeufzaal. Enkel voor uitzonderlijke grote evenementen.'},
+    {name:'Rosas Performance Space',type:'Partner',capacity:150,city:'Brussel (Vorst)',status:'Actief',events:5,note:'Residentieruimte van Rosas. Gebruikt voor dans-try-outs en kleinschalig werk.'},
+  ],
+
+  lidmaatschap: {
+    tiers: [
+      {name:'Vriend',price:35,members:112,benefits:['10% korting op tickets','Vroegboeken (1 week voor publieke verkoop)','Seizoensbrochure thuis']},
+      {name:'Goede Vriend',price:75,members:34,benefits:['20% korting op tickets','Vroegboeken (2 weken)','Uitnodiging voor try-outs en nabesprekingen','Naam op de website']},
+      {name:'Mecenas',price:250,members:10,benefits:['2 gratis tickets per productie','Backstage rondleiding','Persoonlijk contact met artistiek team','Fiscaal attest']},
+    ],
+    stats:{totalMembers:156,revenue:8920,renewalRate:72,lapsedLastYear:18},
+    flexPas:{name:'FlexPas 10',price:120,sold:89,creditsUsed:634,creditsTotal:890,desc:'10 credits, vrij inzetbaar over het seizoen. 1 credit = 1 ticket.'}
+  },
+
+  settings: {
+    features: [
+      {name:'Producties',desc:'Productie-lifecycle management',on:true},
+      {name:'Campagnes',desc:'E-mailcampagnes vanuit het CRM',on:true},
+      {name:'Hospitality',desc:'Gastenlijsten en VIP-beheer',on:true},
+      {name:'Benchmarks',desc:'Sector-vergelijking (deelmodel)',on:true},
+      {name:'Narrowcasting',desc:'Content-feed naar foyer-schermen',on:false},
+      {name:'Fundraising',desc:'Donateursbeheer en campagnes',on:false},
+    ],
+    users: [
+      {name:'Jonas Maes',role:'Admin',email:'jonas.maes@kaaitheater.be'},
+      {name:'Mara Ittel',role:'Communicatie',email:'mara.ittel@kaaitheater.be'},
+      {name:'Titane Michiels',role:'Ticketing',email:'titane.michiels@kaaitheater.be'},
+    ]
+  }
+};
+
+// ════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const genreTag = g => `<span class="tag tag-${DATA.genreColors[g]||'default'}">${g}</span>`;
+const sourceTag = s => { const src = DATA.sources.find(x=>x.id===s); return src ? `<span class="source src-${s}"><span class="source-dot"></span>${src.short}</span>` : ''; };
+const roleTag = r => { const colors = {Bezoeker:'default',Artiest:'coral',Gezelschap:'blue',Partner:'blue',Pers:'amber',Curator:'purple',Coproducent:'blue',Gastlocatie:'blue',Vrijwilliger:'green',Nieuwsbrief:'green',Donor:'amber','Trouwe bezoeker':'green',Leverancier:'default',Leerkracht:'default'}; return `<span class="tag tag-${colors[r]||'default'}">${r}</span>`; };
+const pct = (n,t) => t>0?Math.round(n/t*100):0;
+const fmtN = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+
+function svgBar(data, w, h, barColor='var(--accent)') {
+  const max = Math.max(...data.map(d=>d.v));
+  const bw = Math.floor((w-20)/data.length)-4;
+  let bars = '';
+  data.forEach((d,i) => {
+    const bh = (d.v/max)*(h-30);
+    const x = 10+i*(bw+4);
+    const y = h-20-bh;
+    bars += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="3" fill="${barColor}" opacity="0.85"/>`;
+    bars += `<text x="${x+bw/2}" y="${h-6}" text-anchor="middle" font-size="9" font-weight="600" fill="var(--muted)">${d.m}</text>`;
+  });
+  return `<svg width="100%" height="${h}" viewBox="0 0 ${w} ${h}">${bars}</svg>`;
+}
+
+// ════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════
+let currentScreen = 'dashboard';
+let currentProductionId = null;
+let currentContactId = null;
+let currentCampaignId = null;
+
+const NAV = [
+  { section:'Overzicht', items:[{id:'dashboard',label:'Dashboard',icon:'grid'},{id:'journey',label:'Publieksopbouw',icon:'trending-up'}] },
+  { section:'Programmatie', items:[{id:'producties',label:'Producties',icon:'calendar',count:DATA.productions.length},{id:'locaties',label:'Locaties',icon:'map'},{id:'gastenlijsten',label:'Hospitality',icon:'clipboard'}] },
+  { section:'Publiek', items:[
+    {id:'contacten',label:'Contacten',icon:'users',count:fmtN(DATA.stats.totalContacts)},
+    {id:'segmentatie',label:'Segmentatie',icon:'globe'},
+    {id:'vrijwilligers',label:'Vrijwilligers',icon:'heart'},
+    {id:'lidmaatschap',label:'Vriendenkring',icon:'star'},
+    {id:'fundraising',label:'Donaties & sponsors',icon:'gift'},
+  ]},
+  { section:'Communicatie', items:[{id:'campagnes',label:'Campagnes',icon:'mail'},{id:'automatisering',label:'Workflows',icon:'zap'}] },
+  { section:'Inzichten', items:[{id:'rapportage',label:'Rapportage',icon:'bar-chart'},{id:'toegankelijkheid',label:'Toegankelijkheid',icon:'accessibility'},{id:'benchmarks',label:'Benchmarks',icon:'trending-up'}] },
+  { section:'Cooperatie', items:[{id:'cooperatie',label:'Sector Portaal',icon:'globe'}] },
+  { section:'Systeem', items:[{id:'sync',label:'Koppelingen',icon:'refresh'},{id:'instellingen',label:'Instellingen',icon:'settings'}] },
+];
+
+const ICONS = {
+  grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+  calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  globe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10"/><path d="M2 12h20"/></svg>',
+  clipboard:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>',
+  mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+  'bar-chart':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>',
+  refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
+  'trending-up':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+  settings:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  zap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>',
+  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  accessibility:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="4" r="1.5"/><path d="M7 8l5 1 5-1"/><path d="M12 9v4"/><path d="M8 20l4-7 4 7"/></svg>',
+};
+
+function renderSidebar() {
+  let html = `<div class="sidebar-logo"><div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="logo-text">Cultuur CRM<span>Deelplatform voor de sector</span></div></div>`;
+  NAV.forEach(s => {
+    html += `<div class="sidebar-section"><div class="sidebar-label">${s.section}</div>`;
+    s.items.forEach(it => {
+      const active = currentScreen===it.id?'active':'';
+      html += `<button class="nav-item ${active}" onclick="navigate('${it.id}')">${ICONS[it.icon]}<span>${it.label}</span>${it.count?`<span class="nav-count">${it.count}</span>`:''}</button>`;
+    });
+    html += '</div>';
+  });
+  html += `<div class="sidebar-footer"><div class="sidebar-org">${DATA.org.name}</div><div class="sidebar-season">${DATA.org.season}</div></div>`;
+  $('#sidebar').innerHTML = html;
+}
+
+function navigate(screen, opts={}) {
+  currentScreen = screen;
+  if(opts.productionId) currentProductionId = opts.productionId;
+  if(opts.contactId) currentContactId = opts.contactId;
+  if(opts.campaignId) currentCampaignId = opts.campaignId;
+  $$('.screen').forEach(s => s.classList.remove('active'));
+  $(`#screen-${screen}`).classList.add('active');
+  renderSidebar();
+  renderScreen(screen);
+  $('.main').scrollTo(0,0);
+}
+
+function renderScreen(screen) {
+  const renderers = {
+    dashboard: renderDashboard,
+    producties: renderProducties,
+    'productie-detail': renderProductieDetail,
+    contacten: renderContacten,
+    profiel: renderProfiel,
+    segmentatie: renderSegmentatie,
+    campagnes: renderCampagnes,
+    'campagne-detail': renderCampagneDetail,
+    rapportage: renderRapportage,
+    gastenlijsten: renderGastenlijsten,
+    sync: renderSync,
+    instellingen: renderInstellingen,
+    journey: renderJourney,
+    fundraising: renderFundraising,
+    vrijwilligers: renderVrijwilligers,
+    toegankelijkheid: renderToegankelijkheid,
+    automatisering: renderAutomatisering,
+    locaties: renderLocaties,
+    lidmaatschap: renderLidmaatschap,
+    cooperatie: renderCooperatie,
+    benchmarks: renderBenchmarks,
+  };
+  if(renderers[screen]) renderers[screen]();
+}
+
+// ════════════════════════════════════════════════════
+// SCREEN RENDERERS
+// ════════════════════════════════════════════════════
+
+// ── 1. DASHBOARD ──
+function renderDashboard() {
+  const el = $('#screen-dashboard');
+  const upcoming = DATA.productions.filter(p=>['In verkoop','Inschrijving open'].includes(p.status)).sort((a,b)=>a.id-b.id).slice(0,5);
+  const openShifts = DATA.vrijwilligers.upcoming.reduce((a,u)=>a+(u.needed-u.filled),0);
+  const draftCampaigns = DATA.campaigns.filter(c=>c.status==='Concept'||c.status==='Gepland');
+  const slowSellers = DATA.productions.filter(p=>p.capacity>0&&pct(p.sold,p.capacity)<50&&p.status==='In verkoop');
+  const churnRisk = DATA.journey.atRisk.length;
+
+  // Collect action items
+  const actions = [];
+  if(openShifts>0) actions.push({text:`${openShifts} vrijwilligersshifts nog niet ingevuld`,link:'vrijwilligers',icon:ICONS.heart,color:'var(--amber)',bg:'var(--amber-light)'});
+  if(DATA.duplicates.length>0) actions.push({text:`${DATA.duplicates.length} mogelijke duplicaten te beoordelen`,link:'sync',icon:ICONS.refresh,color:'var(--purple)',bg:'var(--purple-light)'});
+  if(churnRisk>0) actions.push({text:`${churnRisk} bezoekers dreigen af te haken`,link:'journey',icon:ICONS['trending-up'],color:'var(--coral)',bg:'var(--coral-light)'});
+  if(draftCampaigns.length>0) actions.push({text:`${draftCampaigns.length} campagnes klaar om te versturen`,link:'campagnes',icon:ICONS.mail,color:'var(--blue)',bg:'var(--blue-light)'});
+  slowSellers.forEach(p=>actions.push({text:`${p.title} — ${pct(p.sold,p.capacity)}% bezet, verkoop loopt traag`,link:'productie-detail',opts:{productionId:p.id},icon:ICONS.calendar,color:'var(--amber)',bg:'var(--amber-light)'}));
+
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Dashboard</h1><div class="topbar-sub">Maandag 14 april 2026 — ${DATA.org.name}</div></div></div>
+  <div class="content">
+
+    <!-- Aandachtspunten -->
+    ${actions.length>0?`<div class="section">
+      <div class="section-header"><div class="section-title">Aandacht nodig</div><span style="font-size:12px;color:var(--muted)">${actions.length} items</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${actions.map(a=>`<div class="card" style="padding:14px 20px;display:flex;align-items:center;gap:14px;cursor:pointer" onclick="navigate('${a.link}'${a.opts?','+JSON.stringify(a.opts):''})">
+          <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:${a.bg};color:${a.color};display:flex;align-items:center;justify-content:center;flex-shrink:0">${a.icon}</div>
+          <div style="flex:1;font-size:13px;font-weight:500;color:var(--ink)">${a.text}</div>
+          <span style="color:var(--muted);font-size:12px">&rarr;</span>
+        </div>`).join('')}
+      </div>
+    </div>`:''}
+
+    <div class="grid-23">
+      <!-- Linkerkolom: producties + verkoop -->
+      <div>
+        <div class="card section">
+          <div class="section-header"><div class="section-title">Komende producties</div><span style="font-size:12px;color:var(--accent);font-weight:600;cursor:pointer" onclick="navigate('producties')">Alles bekijken &rarr;</span></div>
+          ${upcoming.map(p=>{
+            const sp = p.capacity>0?pct(p.sold,p.capacity):0;
+            const isLow = sp>0&&sp<50;
+            return `<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="navigate('productie-detail',{productionId:${p.id}})">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-weight:600;color:var(--ink);font-size:14px">${p.title}</span>
+                  ${genreTag(p.genre)}
+                </div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px">${p.artist} — ${p.dates} — ${p.venue}</div>
+              </div>
+              ${p.capacity>0?`<div style="display:flex;align-items:center;gap:10px">
+                <div class="progress" style="width:80px"><div class="progress-fill" style="width:${sp}%;background:${sp>=90?'var(--coral)':isLow?'var(--amber)':'var(--accent)'}"></div></div>
+                <span style="font-size:13px;font-weight:600;color:${isLow?'var(--amber)':'var(--ink)'};min-width:36px;text-align:right">${sp}%</span>
+              </div>`:`<span class="tag tag-default">${p.price}</span>`}
+            </div>`;
+          }).join('')}
+        </div>
+
+        <div class="card">
+          <div class="section-header"><div class="section-title">Verkoopoverzicht seizoen</div></div>
+          ${svgBar(DATA.monthlyVisitors, 500, 160)}
+          <div style="display:flex;gap:24px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+            <div><div style="font-size:12px;color:var(--muted)">Tickets verkocht</div><div style="font-size:20px;font-weight:700;color:var(--ink)">${fmtN(DATA.stats.ticketsSold)}</div></div>
+            <div><div style="font-size:12px;color:var(--muted)">Gem. bezetting</div><div style="font-size:20px;font-weight:700;color:var(--ink)">${pct(DATA.productions.filter(p=>p.capacity>0).reduce((a,p)=>a+p.sold,0), DATA.productions.filter(p=>p.capacity>0).reduce((a,p)=>a+p.capacity,0))}%</div></div>
+            <div><div style="font-size:12px;color:var(--muted)">Nieuw publiek</div><div style="font-size:20px;font-weight:700;color:var(--ink)">${DATA.stats.newVisitorPct}%</div></div>
+            <div><div style="font-size:12px;color:var(--muted)">No-shows</div><div style="font-size:20px;font-weight:700;color:var(--ink)">${DATA.stats.noShowRate}%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rechterkolom: activiteit + team -->
+      <div>
+        <div class="card section">
+          <div class="section-title" style="margin-bottom:14px">Vandaag</div>
+          <div class="act-item"><div class="act-icon" style="background:var(--accent-light);color:var(--accent)">${ICONS.check}</div><div><div class="act-title">Sync voltooid</div><div class="act-sub">Ticketmatic — 247 contacten bijgewerkt</div></div><div class="act-time">10:32</div></div>
+          <div class="act-item"><div class="act-icon" style="background:var(--blue-light);color:var(--blue)">${ICONS.mail}</div><div><div class="act-title">Campagne verstuurd</div><div class="act-sub">Herinnering Meg Stuart — 1.204 ontvangers</div></div><div class="act-time">09:15</div></div>
+          <div class="act-item"><div class="act-icon" style="background:var(--amber-light);color:var(--amber)">${ICONS.users}</div><div><div class="act-title">38 nieuwe contacten</div><div class="act-sub">Via ticketverkoop</div></div><div class="act-time">Nacht</div></div>
+        </div>
+
+        <div class="card section">
+          <div class="section-header"><div class="section-title">Vrijwilligers deze week</div><span style="font-size:12px;color:var(--accent);font-weight:600;cursor:pointer" onclick="navigate('vrijwilligers')">Beheer &rarr;</span></div>
+          ${DATA.vrijwilligers.upcoming.slice(0,2).map(u=>`<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-weight:600;color:var(--ink);font-size:13px">${u.production}</div>
+                <div style="font-size:12px;color:var(--muted)">${u.date}</div>
+              </div>
+              <span style="font-size:13px;font-weight:600;color:${u.filled>=u.needed?'var(--accent)':'var(--amber)'}">${u.filled}/${u.needed}</span>
+            </div>
+          </div>`).join('')}
+        </div>
+
+        <div class="card">
+          <div class="section-header"><div class="section-title">Laatste campagne</div><span style="font-size:12px;color:var(--accent);font-weight:600;cursor:pointer" onclick="navigate('campagnes')">Alle &rarr;</span></div>
+          <div style="font-weight:600;color:var(--ink);margin-bottom:8px">Herinnering: Meg Stuart / BEAST</div>
+          <div style="display:flex;gap:20px">
+            <div><div style="font-size:11px;color:var(--muted)">Open rate</div><div style="font-size:18px;font-weight:700;color:var(--ink)">42,3%</div></div>
+            <div><div style="font-size:11px;color:var(--muted)">Clicks</div><div style="font-size:18px;font-weight:700;color:var(--ink)">8,1%</div></div>
+            <div><div style="font-size:11px;color:var(--muted)">Tickets</div><div style="font-size:18px;font-weight:700;color:var(--accent)">47</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── 2. PRODUCTIES ──
+function renderProducties() {
+  const el = $('#screen-producties');
+  const totalSold = DATA.productions.reduce((a,p)=>a+p.sold,0);
+  const totalCap = DATA.productions.filter(p=>p.capacity>0).reduce((a,p)=>a+p.capacity,0);
+  const soldOut = DATA.productions.filter(p=>p.status==='Uitverkocht').length;
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Producties</h1><div class="topbar-sub">Seizoen ${DATA.org.season}</div></div><div class="topbar-actions"><button class="btn btn-primary btn-sm">${ICONS.plus} Productie toevoegen</button></div></div>
+  <div class="content">
+    <div class="stats-grid">
+      <div class="card"><div class="stat-label">Producties</div><div class="stat-value">${DATA.productions.length}</div><div class="stat-sub">Dit seizoen</div></div>
+      <div class="card"><div class="stat-label">Tickets verkocht</div><div class="stat-value">${fmtN(totalSold)}</div><div class="stat-sub">Van ${fmtN(totalCap)} capaciteit</div></div>
+      <div class="card"><div class="stat-label">Gem. bezetting</div><div class="stat-value">${pct(totalSold,totalCap)}%</div><div class="stat-sub">Over alle producties</div></div>
+      <div class="card"><div class="stat-label">Uitverkocht</div><div class="stat-value">${soldOut}</div><div class="stat-sub">Van ${DATA.productions.length} producties</div></div>
+    </div>
+    <div class="filters-bar">
+      <input type="text" class="input" placeholder="Zoek op titel of artiest..." style="max-width:280px">
+      <select class="input" style="max-width:140px"><option>Alle genres</option>${DATA.genres.map(g=>`<option>${g}</option>`).join('')}</select>
+      <select class="input" style="max-width:140px"><option>Alle statussen</option><option>In verkoop</option><option>Uitverkocht</option><option>Geprogrammeerd</option><option>Gratis</option></select>
+      <select class="input" style="max-width:140px"><option>Alle locaties</option>${[...new Set(DATA.productions.map(p=>p.venue))].map(v=>`<option>${v}</option>`).join('')}</select>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table><thead><tr><th>Productie</th><th>Genre</th><th>Data</th><th>Locatie</th><th>Verkoop</th><th>Status</th></tr></thead>
+      <tbody>${DATA.productions.map(p=>{
+        const sp = p.capacity>0?pct(p.sold,p.capacity):0;
+        return `<tr onclick="navigate('productie-detail',{productionId:${p.id}})">
+          <td><div class="contact-name">${p.title}</div><div class="contact-email">${p.artist}</div></td>
+          <td>${genreTag(p.genre)}</td>
+          <td style="color:var(--muted);white-space:nowrap">${p.dates}</td>
+          <td style="color:var(--muted)">${p.venue}</td>
+          <td>${p.capacity>0?`<div style="display:flex;align-items:center;gap:8px"><div class="progress" style="width:60px"><div class="progress-fill" style="width:${sp}%;background:${sp>=95?'var(--coral)':sp>=60?'var(--accent)':'var(--blue)'}"></div></div><span style="font-size:12px;font-weight:600">${sp}%</span></div>`:`<span style="color:var(--muted);font-size:12px">${p.price}</span>`}</td>
+          <td><span class="tag tag-${p.status==='Uitverkocht'?'coral':p.status==='In verkoop'?'green':'default'}">${p.status}</span></td>
+        </tr>`;
+      }).join('')}</tbody></table>
+    </div>
+  </div>`;
+}
+
+// ── 3. PRODUCTIE DETAIL ──
+function renderProductieDetail() {
+  const p = DATA.productions.find(x=>x.id===currentProductionId) || DATA.productions[0];
+  const sold_pct = p.capacity>0?pct(p.sold,p.capacity):0;
+  const campaigns = DATA.campaigns.filter(c=>c.production===p.id);
+  const guests = DATA.guestLists.find(g=>g.productionId===p.id);
+  const el = $('#screen-productie-detail');
+  el.innerHTML = `
+  <div class="topbar"><div style="display:flex;align-items:center;gap:10px"><button class="btn btn-ghost" onclick="navigate('producties')">${ICONS.back}</button><div><h1>${p.title}</h1><div class="topbar-sub">${p.artist} — ${p.dates}</div></div></div><div class="topbar-actions"><button class="btn btn-secondary btn-sm">Bewerk</button><button class="btn btn-primary btn-sm">Campagne starten</button></div></div>
+  <div class="content">
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:20px">${genreTag(p.genre)}<span style="font-size:13px;color:var(--muted);font-weight:500">${p.venue} — ${p.dates}</span><span class="tag tag-${p.status==='Uitverkocht'?'coral':p.status==='In verkoop'?'green':'default'}">${p.status}</span></div>
+    <div class="tabs" id="prod-tabs">
+      <button class="tab active" onclick="switchProdTab('planning')">Planning</button>
+      <button class="tab" onclick="switchProdTab('campagne')">Campagne & verkoop</button>
+      <button class="tab" onclick="switchProdTab('hospitality')">Hospitality</button>
+      <button class="tab" onclick="switchProdTab('evaluatie')">Evaluatie</button>
+    </div>
+    <div id="prod-tab-planning" class="tab-content active">
+      <div class="grid-2">
+        <div class="card"><div class="section-title" style="margin-bottom:12px">Productiegegevens</div>
+          <div class="detail-row"><span class="detail-label">Yesplan ID</span><span class="detail-value">${p.yesplanId}</span></div>
+          <div class="detail-row"><span class="detail-label">Zaal</span><span class="detail-value">${p.venue}</span></div>
+          <div class="detail-row"><span class="detail-label">Capaciteit</span><span class="detail-value">${p.capacity>0?p.capacity:'N.v.t.'}</span></div>
+          <div class="detail-row"><span class="detail-label">Genre</span><span class="detail-value">${p.genre}</span></div>
+          <div class="detail-row"><span class="detail-label">Prijsmodel</span><span class="detail-value">${p.price}</span></div>
+          <div class="detail-row"><span class="detail-label">Data</span><span class="detail-value">${p.dates}</span></div>
+        </div>
+        <div class="card"><div class="section-title" style="margin-bottom:12px">Gezelschap</div>
+          <div class="detail-row"><span class="detail-label">Naam</span><span class="detail-value">${p.artist}</span></div>
+          <div class="detail-row"><span class="detail-label">Eerder bij Kaaitheater</span><span class="detail-value">4 producties</span></div>
+          <div class="detail-row"><span class="detail-label">Laatste keer</span><span class="detail-value">Mar 2025 — 380 tickets</span></div>
+          <div class="detail-row"><span class="detail-label">Contactpersoon</span><span class="detail-value">Via Yesplan</span></div>
+        </div>
+      </div>
+    </div>
+    <div id="prod-tab-campagne" class="tab-content">
+      ${p.capacity>0?`<div class="card" style="margin-bottom:16px"><div class="section-title" style="margin-bottom:12px">Verkoopstatus</div>
+        <div style="display:flex;gap:32px;margin-bottom:14px">
+          <div><div class="stat-label">Verkocht</div><div class="stat-value" style="font-size:24px">${p.sold}</div></div>
+          <div><div class="stat-label">Capaciteit</div><div class="stat-value" style="font-size:24px">${p.capacity}</div></div>
+          <div><div class="stat-label">Bezetting</div><div class="stat-value" style="font-size:24px">${sold_pct}%</div></div>
+        </div>
+        <div class="progress" style="height:8px"><div class="progress-fill" style="width:${sold_pct}%;background:var(--accent)"></div></div>
+      </div>`:''}
+      <div class="section-header"><div class="section-title">Gekoppelde campagnes</div></div>
+      ${campaigns.length>0?campaigns.map(c=>`<div class="card campaign-card" style="margin-bottom:12px;cursor:pointer" onclick="navigate('campagne-detail',{campaignId:${c.id}})"><div style="display:flex;justify-content:space-between"><div style="font-weight:700;color:var(--ink)">${c.name}</div><span class="tag tag-${c.statusClass}">${c.status}</span></div>${c.openRate?`<div class="campaign-stats"><div><div class="cs-label">Ontvangers</div><div class="cs-val">${fmtN(c.recipients)}</div></div><div><div class="cs-label">Open rate</div><div class="cs-val">${c.openRate}%</div></div><div><div class="cs-label">Tickets</div><div class="cs-val">${c.tickets}</div></div></div>`:''}</div>`).join(''):`<p style="color:var(--muted);font-size:13px">Nog geen campagnes gekoppeld aan deze productie.</p>`}
+      <div style="margin-top:12px"><button class="btn btn-secondary btn-sm">${ICONS.plus} Campagne toevoegen</button></div>
+    </div>
+    <div id="prod-tab-hospitality" class="tab-content">
+      <div class="card">
+        <div class="section-header"><div class="section-title">Gastenlijst</div><button class="btn btn-secondary btn-sm">${ICONS.plus} Gast toevoegen</button></div>
+        ${guests?`<table><thead><tr><th>Naam</th><th>Rol</th><th>Status</th></tr></thead><tbody>${guests.guests.map(g=>`<tr><td class="contact-name">${g.name}</td><td><span class="tag tag-${g.role==='Pers'?'amber':g.role==='VIP'?'coral':g.role==='Partner'?'blue':'purple'}">${g.role}</span></td><td><span class="tag tag-${g.status==='Bevestigd'?'green':'default'}">${g.status}</span></td></tr>`).join('')}</tbody></table>`:`<p style="color:var(--muted);font-size:13px">Nog geen gasten toegevoegd.</p>`}
+      </div>
+    </div>
+    <div id="prod-tab-evaluatie" class="tab-content">
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="card"><div class="stat-label">Tickets verkocht</div><div class="stat-value" style="font-size:24px">${p.sold}</div></div>
+        <div class="card"><div class="stat-label">Bezetting</div><div class="stat-value" style="font-size:24px">${sold_pct}%</div></div>
+        <div class="card"><div class="stat-label">No-shows</div><div class="stat-value" style="font-size:24px">${Math.round(p.sold*0.078)}</div></div>
+        <div class="card"><div class="stat-label">Via campagnes</div><div class="stat-value" style="font-size:24px">${campaigns.reduce((a,c)=>a+(c.tickets||0),0)}</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="section-title" style="margin-bottom:12px">Funnel</div>
+          <div class="detail-row"><span class="detail-label">Nieuwsbrief verstuurd</span><span class="detail-value">1.204</span></div>
+          <div class="detail-row"><span class="detail-label">E-mail geopend</span><span class="detail-value">509 (42%)</span></div>
+          <div class="detail-row"><span class="detail-label">Doorgeklikt naar website</span><span class="detail-value">98 (8,1%)</span></div>
+          <div class="detail-row"><span class="detail-label">Ticket gekocht via campagne</span><span class="detail-value">47 (3,9%)</span></div>
+        </div>
+        <div class="card"><div class="section-title" style="margin-bottom:12px">Publieksprofiel</div>
+          <div class="detail-row"><span class="detail-label">Nieuw publiek</span><span class="detail-value">28%</span></div>
+          <div class="detail-row"><span class="detail-label">Terugkerend</span><span class="detail-value">72%</span></div>
+          <div class="detail-row"><span class="detail-label">Top genre-affiniteit</span><span class="detail-value">Dans (84%)</span></div>
+          <div class="detail-row"><span class="detail-label">PWYW gemiddelde</span><span class="detail-value">Niveau 3 / 5</span></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function switchProdTab(tab) {
+  $$('#screen-productie-detail .tab').forEach(t=>t.classList.remove('active'));
+  $$('#screen-productie-detail .tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  $(`#prod-tab-${tab}`).classList.add('active');
+}
+
+// ── 4. CONTACTEN ──
+function renderContacten() {
+  const el = $('#screen-contacten');
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Contacten</h1><div class="topbar-sub">${fmtN(DATA.stats.totalContacts)} contacten uit 4 bronnen</div></div><div class="topbar-actions"><button class="btn btn-secondary btn-sm">Importeer</button><button class="btn btn-primary btn-sm">${ICONS.plus} Nieuw contact</button></div></div>
+  <div class="content">
+    <div class="filters-bar">
+      <input type="text" class="input" placeholder="Zoek op naam, e-mail, organisatie...">
+      <select class="input" style="max-width:130px"><option>Alle rollen</option><option>Bezoeker</option><option>Artiest</option><option>Gezelschap</option><option>Partner</option><option>Pers</option><option>Curator</option><option>Vrijwilliger</option></select>
+      <select class="input" style="max-width:130px"><option>Alle bronnen</option>${DATA.sources.map(s=>`<option>${s.name}</option>`).join('')}</select>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table><thead><tr><th>Naam</th><th>Rollen</th><th>Bronnen</th><th>Laatste interactie</th><th style="text-align:right">Tickets</th></tr></thead>
+      <tbody>${DATA.contacts.map(c=>`<tr onclick="navigate('profiel',{contactId:${c.id}})"><td><div class="contact-name">${c.name}</div><div class="contact-email">${c.email}</div></td><td>${c.roles.map(r=>roleTag(r)).join('')}</td><td><div class="sources-row">${c.sources.map(s=>sourceTag(s)).join('')}</div></td><td style="color:var(--muted)">${c.lastInteraction}</td><td style="text-align:right;font-weight:600">${c.tickets12m||'—'}</td></tr>`).join('')}</tbody></table>
+    </div>
+    <div style="padding:12px 0;color:var(--muted);font-size:11px;font-weight:500">Pagina 1 van 717</div>
+  </div>`;
+}
+
+// ── 5. CONTACTPROFIEL ──
+function renderProfiel() {
+  const c = DATA.contacts.find(x=>x.id===currentContactId) || DATA.contacts[0];
+  const el = $('#screen-profiel');
+  // Determine journey stage
+  const stage = c.tickets12m>=5?'Trouw':c.tickets12m>=2?'Terugkerend':c.tickets12m>=1?'Eerste bezoek':'Onbekend';
+  const stageColor = {Trouw:'var(--amber)',Terugkerend:'var(--accent)','Eerste bezoek':'var(--blue)',Onbekend:'var(--muted)'}[stage];
+  // Find related productions
+  const relatedProds = c.roles.includes('Artiest')||c.roles.includes('Gezelschap') ? DATA.productions.filter(p=>p.artist.toLowerCase().includes(c.name.split(' ')[0].toLowerCase())).slice(0,3) : [];
+
+  el.innerHTML = `
+  <div class="topbar"><div style="display:flex;align-items:center;gap:10px"><button class="btn btn-ghost" onclick="navigate('contacten')">${ICONS.back}</button><h1>${c.name}</h1></div><div class="topbar-actions"><button class="btn btn-secondary btn-sm">Bewerk</button><button class="btn btn-secondary btn-sm">Campagne</button></div></div>
+  <div class="content">
+    <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:28px">
+      <div class="profile-avatar" style="background:${c.color}">${c.avatar}</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-0.03em">${c.name}</div>
+          <span class="tag" style="background:${stageColor};color:white">${stage}</span>
+        </div>
+        <div style="color:var(--muted);font-size:13px;margin-top:4px">${c.email}${c.address?` — ${c.address.split(',').pop().trim()}`:''}</div>
+        <div style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap">${c.roles.map(r=>roleTag(r)).join('')}</div>
+        <div style="margin-top:10px;display:flex;gap:16px;align-items:center">
+          <div class="sources-row">${c.sources.map(s=>sourceTag(s)).join('')}</div>
+          ${c.owner?`<span style="font-size:12px;color:var(--muted);border-left:1px solid var(--border);padding-left:16px">Contacteigenaar: <strong style="color:var(--ink)">${c.owner}</strong></span>`:''}
+        </div>
+      </div>
+      ${c.tickets12m>0?`<div style="text-align:right">
+        <div style="font-size:28px;font-weight:700;color:var(--ink)">${c.tickets12m}</div>
+        <div style="font-size:12px;color:var(--muted)">tickets (12m)</div>
+        ${c.spent?`<div style="font-size:16px;font-weight:600;color:var(--ink);margin-top:4px">&euro; ${c.spent}</div>`:''}
+      </div>`:''}
+    </div>
+
+    <div class="tabs" id="profiel-tabs">
+      <button class="tab active" onclick="switchProfielTab('overzicht')">Overzicht</button>
+      <button class="tab" onclick="switchProfielTab('tijdlijn')">Tijdlijn</button>
+      <button class="tab" onclick="switchProfielTab('consent')">GDPR & consent</button>
+    </div>
+
+    <div id="profiel-tab-overzicht" class="tab-content active">
+      <div class="profile-grid">
+        <div>
+          <div class="card section"><div class="section-title" style="margin-bottom:14px">Contactgegevens</div>
+            <div class="detail-row"><span class="detail-label">E-mail</span><span class="detail-value">${c.email}</span></div>
+            ${c.phone?`<div class="detail-row"><span class="detail-label">Telefoon</span><span class="detail-value">${c.phone}</span></div>`:''}
+            ${c.address?`<div class="detail-row"><span class="detail-label">Adres</span><span class="detail-value">${c.address}</span></div>`:''}
+            ${c.lang?`<div class="detail-row"><span class="detail-label">Taal</span><span class="detail-value">${c.lang}</span></div>`:''}
+          </div>
+          ${c.tickets12m>0?`<div class="card section"><div class="section-title" style="margin-bottom:14px">Bezoekprofiel</div>
+            ${c.since?`<div class="detail-row"><span class="detail-label">Eerste bezoek</span><span class="detail-value">${c.since}</span></div>`:''}
+            <div class="detail-row"><span class="detail-label">Stadium</span><span class="detail-value" style="color:${stageColor};font-weight:700">${stage}</span></div>
+            ${c.pref?`<div class="detail-row"><span class="detail-label">Voorkeur genres</span><span class="detail-value">${c.pref.join(', ')}</span></div>`:''}
+            ${c.spent?`<div class="detail-row"><span class="detail-label">Besteding (12m)</span><span class="detail-value">&euro; ${c.spent},00</span></div>`:''}
+          </div>`:''}
+        </div>
+        <div>
+          ${relatedProds.length>0?`<div class="card section"><div class="section-title" style="margin-bottom:14px">Gekoppelde producties</div>
+            ${relatedProds.map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="navigate('productie-detail',{productionId:${p.id}})"><div style="flex:1"><div style="font-weight:600;color:var(--ink);font-size:13px">${p.title}</div><div style="font-size:12px;color:var(--muted)">${p.dates}</div></div>${genreTag(p.genre)}</div>`).join('')}
+          </div>`:''}
+          <div class="card section">
+            <div class="section-header"><div class="section-title">Notities</div><button class="btn btn-secondary btn-sm">${ICONS.plus} Toevoegen</button></div>
+            ${c.timeline&&c.timeline.find(t=>t.type==='note')?c.timeline.filter(t=>t.type==='note').map(n=>`<div style="padding:12px;background:var(--surface);border-radius:var(--radius-sm);margin-bottom:8px"><div style="font-size:13px;color:var(--ink)">${n.title.replace('Notitie: ','')}</div><div style="font-size:11px;color:var(--muted);margin-top:4px">${n.date} — ${n.by||''}</div></div>`).join(''):`<p style="font-size:13px;color:var(--muted)">Nog geen notities. Voeg context toe die niet verloren mag gaan.</p>`}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="profiel-tab-tijdlijn" class="tab-content">
+      <div class="card">
+        ${c.timeline?c.timeline.map(t=>{
+          const dotColor = t.source==='tm'?'#FF6B00':t.source==='mc'?'#F5A623':t.source==='crm'?'var(--accent)':'var(--muted)';
+          const sourceLabel = {tm:'Ticketmatic',mc:'Mailchimp',crm:'CRM',yp:'Yesplan'}[t.source]||t.source;
+          return `<div class="tl-item"><div class="tl-dot" style="background:${dotColor}"></div><div style="flex:1"><div class="tl-title">${t.title}</div><div class="tl-date">${t.date}${t.by?` — ${t.by}`:''}</div></div><span style="font-size:11px;color:var(--muted)">${sourceLabel}</span></div>`;
+        }).join(''):`<p style="color:var(--muted);font-size:13px;padding:20px 0">Geen activiteit beschikbaar voor dit contact.</p>`}
+      </div>
+    </div>
+
+    <div id="profiel-tab-consent" class="tab-content">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:16px">Toestemming per kanaal</div>
+        ${c.consent?Object.entries(c.consent).map(([k,v])=>`<div class="consent-row"><div><strong style="color:var(--ink);text-transform:capitalize;font-size:14px">${k}</strong><div style="font-size:12px;color:var(--muted);margin-top:2px">Sinds ${v.since}</div></div><div class="toggle ${v.status==='opt-in'?'on':''}"></div></div>`).join('')
+        :`<div class="consent-row"><div><strong style="color:var(--ink)">Geen consent data</strong><div style="font-size:12px;color:var(--muted);margin-top:2px">Dit contact heeft nog geen consent-voorkeuren vastgelegd</div></div></div>`}
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);display:flex;gap:8px">
+          <button class="btn btn-secondary btn-sm">${ICONS.download} Data export (GDPR)</button>
+          <button class="btn btn-secondary btn-sm" style="color:var(--coral);border-color:var(--coral)">Anonimiseer contact</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function switchProfielTab(tab){$$('#screen-profiel .tab').forEach(t=>t.classList.remove('active'));$$('#screen-profiel .tab-content').forEach(t=>t.classList.remove('active'));event.target.classList.add('active');$(`#profiel-tab-${tab}`).classList.add('active');}
+
+// ── 5b. (removed old profiel closing) ──
+// ── 6. SEGMENTATIE ──
+function renderSegmentatie() {
+  const el = $('#screen-segmentatie');
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Segmentatie</h1><div class="topbar-sub">Bouw doelgroepen op basis van data uit al je systemen</div></div><div class="topbar-actions"><button class="btn btn-primary btn-sm">${ICONS.plus} Nieuw segment</button></div></div>
+  <div class="content">
+    <div class="card" style="margin-bottom:20px">
+      <div class="section-title" style="margin-bottom:14px">Segment opbouwen</div>
+      <div class="rule-row"><select><option>Tickets gekocht</option><option>Nieuwsbrief status</option><option>Laatste bezoek</option><option>Genre-affiniteit</option><option>Taal</option><option>Postcode</option><option>PWYW-niveau</option><option>Bezoekfrequentie trend</option></select><select><option>meer dan</option><option>minder dan</option><option>gelijk aan</option></select><input type="text" value="3" style="width:60px"><span style="color:var(--muted);font-size:11px;font-weight:500">in de afgelopen 12 maanden</span></div>
+      <div class="rule-connector">EN</div>
+      <div class="rule-row"><select><option selected>Nieuwsbrief status</option></select><select><option selected>is gelijk aan</option></select><select><option selected>Niet ingeschreven</option><option>Ingeschreven</option></select></div>
+      <div class="rule-connector">EN</div>
+      <div class="rule-row"><select><option selected>Genre-affiniteit</option></select><select><option selected>bevat</option></select><select><option selected>Dans</option><option>Theater</option><option>Performance</option></select></div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px">${ICONS.plus} Regel toevoegen</button>
+      <div style="display:flex;align-items:center;gap:16px;padding:18px;background:var(--accent-light);border-radius:var(--radius);margin-top:16px;border:1px solid #C5E8DC">
+        <div style="text-align:center;min-width:70px"><div style="font-size:32px;font-weight:800;color:var(--accent)">284</div><div style="color:var(--muted);font-size:11px;font-weight:500">contacten</div></div>
+        <div style="flex:1;padding-left:16px;border-left:2px solid var(--accent)"><div style="font-size:14px;font-weight:700;color:var(--ink)">Trouwe dansbezoekers zonder nieuwsbrief</div><div style="color:var(--muted);font-size:12px;margin-top:3px">Bezoekers met 3+ danstickets maar geen nieuwsbrief-inschrijving. Ideaal voor re-engagement.</div></div>
+        <button class="btn btn-primary btn-sm">Campagne starten</button>
+      </div>
+    </div>
+    <div class="section-header"><div class="section-title">Kant-en-klare recepten</div></div>
+    <div class="grid-3" style="margin-bottom:20px">
+      <div class="card" style="cursor:pointer;padding:16px"><div style="font-weight:700;color:var(--ink);font-size:13px">Churn-risico</div><div style="color:var(--muted);font-size:11px;margin-top:3px">Frequentie dalend, 50%+ minder dan vorig seizoen</div><div style="font-size:20px;font-weight:800;color:var(--coral);margin-top:8px">156</div></div>
+      <div class="card" style="cursor:pointer;padding:16px"><div style="font-weight:700;color:var(--ink);font-size:13px">Nieuwsbrief → nooit ticket</div><div style="color:var(--muted);font-size:11px;margin-top:3px">Abonnee maar nooit gekocht</div><div style="font-size:20px;font-weight:800;color:var(--amber);margin-top:8px">2.341</div></div>
+      <div class="card" style="cursor:pointer;padding:16px"><div style="font-weight:700;color:var(--ink);font-size:13px">PWYW laag + frequent</div><div style="color:var(--muted);font-size:11px;margin-top:3px">Structureel laagste prijs, 4+ bezoeken</div><div style="font-size:20px;font-weight:800;color:var(--accent);margin-top:8px">203</div></div>
+    </div>
+    <div class="card"><div class="section-header"><div class="section-title">Opgeslagen segmenten</div></div>
+      <table><thead><tr><th>Segment</th><th style="text-align:right">Contacten</th><th>Trend</th><th>Laatst gebruikt</th><th></th></tr></thead>
+      <tbody>${DATA.segments.map(s=>`<tr><td><div class="contact-name">${s.name}</div><div class="contact-email">${s.desc}</div></td><td style="text-align:right;font-weight:700">${fmtN(s.count)}</td><td style="color:${s.trend.startsWith('+')?'var(--accent)':s.trend.startsWith('-')?'var(--coral)':'var(--muted)'};font-weight:600;font-size:12px">${s.trend==='0'?'—':s.trend}</td><td style="color:var(--muted)">${s.lastUsed}</td><td><button class="btn btn-secondary btn-sm">Bekijk</button></td></tr>`).join('')}</tbody></table>
+    </div>
+  </div>`;
+}
+
+// ── 7. CAMPAGNES ──
+function renderCampagnes() {
+  const el = $('#screen-campagnes');
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Campagnes</h1><div class="topbar-sub">E-mailcampagnes vanuit je CRM, gericht op de juiste doelgroep</div></div><div class="topbar-actions"><button class="btn btn-primary btn-sm">${ICONS.plus} Nieuwe campagne</button></div></div>
+  <div class="content">
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card"><div class="stat-label">Dit seizoen</div><div class="stat-value">24</div><div class="stat-sub">campagnes verstuurd</div></div>
+      <div class="card"><div class="stat-label">Gem. open rate</div><div class="stat-value">38,7%</div><div class="stat-sub">Sector gemiddelde: 28%</div></div>
+      <div class="card"><div class="stat-label">Gem. click rate</div><div class="stat-value">6,2%</div><div class="stat-sub">Sector gemiddelde: 3,8%</div></div>
+    </div>
+    <div class="section-header"><div class="section-title">Alle campagnes</div></div>
+    <div class="grid-2">${DATA.campaigns.map(c=>`<div class="card campaign-card" style="cursor:pointer" onclick="navigate('campagne-detail',{campaignId:${c.id}})">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-weight:700;font-size:14px;color:var(--ink)">${c.name}</div><span class="tag tag-${c.statusClass}">${c.status}</span></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px">${c.segment}</div>
+      ${c.openRate?`<div class="campaign-stats"><div><div class="cs-label">Ontvangers</div><div class="cs-val">${fmtN(c.recipients)}</div></div><div><div class="cs-label">Open rate</div><div class="cs-val">${c.openRate}%</div></div><div><div class="cs-label">Clicks</div><div class="cs-val">${c.clickRate}%</div></div>${c.tickets!==null?`<div><div class="cs-label">Tickets</div><div class="cs-val">${c.tickets}</div></div>`:''}</div>`
+      :`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)">${c.date?`Gepland: ${c.date}`:'Concept — nog niet ingepland'} — ${fmtN(c.recipients)} ontvangers</div>`}
+    </div>`).join('')}</div>
+  </div>`;
+}
+
+// ── 8. CAMPAGNE DETAIL ──
+function renderCampagneDetail() {
+  const c = DATA.campaigns.find(x=>x.id===currentCampaignId) || DATA.campaigns[0];
+  const el = $('#screen-campagne-detail');
+  el.innerHTML = `
+  <div class="topbar"><div style="display:flex;align-items:center;gap:10px"><button class="btn btn-ghost" onclick="navigate('campagnes')">${ICONS.back}</button><div><h1>${c.name}</h1><div class="topbar-sub">${c.segment}</div></div></div><div class="topbar-actions"><span class="tag tag-${c.statusClass}">${c.status}</span></div></div>
+  <div class="content">
+    ${c.openRate?`<div class="stats-grid"><div class="card"><div class="stat-label">Ontvangers</div><div class="stat-value">${fmtN(c.recipients)}</div></div><div class="card"><div class="stat-label">Open rate</div><div class="stat-value">${c.openRate}%</div></div><div class="card"><div class="stat-label">Click rate</div><div class="stat-value">${c.clickRate}%</div></div><div class="card"><div class="stat-label">Tickets verkocht</div><div class="stat-value">${c.tickets}</div></div></div>`:''}
+    ${c.abTest?`<div class="card section"><div class="section-title" style="margin-bottom:12px">A/B Test resultaten</div>
+      <div class="grid-2">
+        <div style="padding:14px;border:${c.abTest.winnerA?'2px solid var(--accent)':'1px solid var(--border)'};border-radius:var(--radius)"><div style="display:flex;justify-content:space-between"><div style="font-weight:700;color:var(--ink)">Variant A ${c.abTest.winnerA?'(Winnaar)':''}</div><div style="font-weight:700;color:var(--accent)">${c.abTest.openA}%</div></div><div style="color:var(--muted);font-size:12px;margin-top:4px">"${c.abTest.a}"</div></div>
+        <div style="padding:14px;border:${!c.abTest.winnerA?'2px solid var(--accent)':'1px solid var(--border)'};border-radius:var(--radius)"><div style="display:flex;justify-content:space-between"><div style="font-weight:700;color:var(--ink)">Variant B ${!c.abTest.winnerA?'(Winnaar)':''}</div><div style="font-weight:700;color:var(--blue)">${c.abTest.openB}%</div></div><div style="color:var(--muted);font-size:12px;margin-top:4px">"${c.abTest.b}"</div></div>
+      </div>
+    </div>`:''}
+    ${c.production?`<div class="card section"><div class="section-title" style="margin-bottom:12px">Funnel: campagne → ticket</div>
+      <div class="detail-row"><span class="detail-label">Verstuurd</span><span class="detail-value">${fmtN(c.recipients)}</span></div>
+      <div class="detail-row"><span class="detail-label">Geopend</span><span class="detail-value">${Math.round(c.recipients*c.openRate/100)} (${c.openRate}%)</span></div>
+      <div class="detail-row"><span class="detail-label">Doorgeklikt</span><span class="detail-value">${Math.round(c.recipients*c.clickRate/100)} (${c.clickRate}%)</span></div>
+      <div class="detail-row"><span class="detail-label">Ticket gekocht</span><span class="detail-value" style="color:var(--accent)">${c.tickets}</span></div>
+    </div>`:''}
+  </div>`;
+}
+
+// ── 9. RAPPORTAGE ──
+function renderRapportage() {
+  const el = $('#screen-rapportage');
+  const barRow = (d,color='var(--accent)') => `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="width:140px;font-size:13px;color:var(--ink);font-weight:500;flex-shrink:0">${d.l}</span><div style="flex:1;height:8px;background:#EAECF0;border-radius:4px;overflow:hidden"><div style="height:100%;width:${d.v}%;background:${d.c||color};border-radius:4px"></div></div><span style="width:50px;text-align:right;font-size:13px;font-weight:600;color:var(--ink)">${d.v}${d.u||'%'}</span></div>`;
+
+  const genreData = [{l:'Dans',v:47,c:'var(--coral)'},{l:'Theater',v:28,c:'var(--blue)'},{l:'Performance',v:15,c:'var(--purple)'},{l:'Conversatie',v:7,c:'var(--amber)'},{l:'Overig',v:3,c:'var(--muted)'}];
+  const geoData = [{l:'Brussel (19 gemeenten)',v:62},{l:'Vlaanderen',v:24},{l:'Wallonie',v:4},{l:'Internationaal',v:10}];
+  const ageData = [{l:'< 18 jaar',v:6},{l:'18 – 25 jaar',v:25},{l:'26 – 35 jaar',v:22},{l:'36 – 50 jaar',v:24},{l:'51 – 65 jaar',v:15},{l:'65+ jaar',v:8}];
+  const pwyc = [{l:'Niveau 1 (EUR 7)',v:18},{l:'Niveau 2 (EUR 12)',v:22},{l:'Niveau 3 (EUR 18)',v:31},{l:'Niveau 4 (EUR 25)',v:19},{l:'Niveau 5 (EUR 35)',v:10}];
+  const taalData = [{l:'NL',v:58},{l:'FR',v:18},{l:'EN',v:16},{l:'DE/Overig',v:8}];
+
+  const topProductions = DATA.productions.filter(p=>p.capacity>0).sort((a,b)=>pct(b.sold,b.capacity)-pct(a.sold,a.capacity)).slice(0,5);
+
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Rapportage</h1><div class="topbar-sub">Seizoen ${DATA.org.season} — ${DATA.org.name}</div></div><div class="topbar-actions"><button class="btn btn-secondary btn-sm">${ICONS.download} PDF rapport</button><button class="btn btn-primary btn-sm">${ICONS.download} Kunstendecreet export</button></div></div>
+  <div class="content">
+
+    <div class="tabs" id="rap-tabs">
+      <button class="tab active" onclick="switchRapTab('seizoen')">Seizoensoverzicht</button>
+      <button class="tab" onclick="switchRapTab('publiek')">Publieksprofiel</button>
+      <button class="tab" onclick="switchRapTab('producties')">Per productie</button>
+      <button class="tab" onclick="switchRapTab('communicatie')">Communicatie</button>
+      <button class="tab" onclick="switchRapTab('kunstendecreet')">Kunstendecreet</button>
+      <button class="tab" onclick="switchRapTab('financieel')">Financieel</button>
+      <button class="tab" onclick="switchRapTab('kpis')">Beheersovereenkomst</button>
+    </div>
+
+    <!-- TAB: Seizoensoverzicht -->
+    <div id="rap-tab-seizoen" class="tab-content active">
+      <div class="stats-grid" style="grid-template-columns:repeat(5,1fr)">
+        <div class="card"><div class="stat-label">Producties</div><div class="stat-value">${DATA.productions.length}</div><div class="stat-sub">${DATA.productions.filter(p=>p.genre==='Dans').length} dans, ${DATA.productions.filter(p=>p.genre==='Theater').length} theater</div></div>
+        <div class="card"><div class="stat-label">Tickets</div><div class="stat-value">${fmtN(DATA.stats.ticketsSold)}</div><div class="stat-sub">Verkocht dit seizoen</div></div>
+        <div class="card"><div class="stat-label">Unieke bezoekers</div><div class="stat-value">${fmtN(DATA.stats.activeVisitors)}</div><div class="stat-sub">${DATA.stats.newVisitorPct}% nieuw</div></div>
+        <div class="card"><div class="stat-label">Bezetting</div><div class="stat-value">${pct(DATA.productions.filter(p=>p.capacity>0).reduce((a,p)=>a+p.sold,0),DATA.productions.filter(p=>p.capacity>0).reduce((a,p)=>a+p.capacity,0))}%</div><div class="stat-sub">Gem. over alle producties</div></div>
+        <div class="card"><div class="stat-label">Locaties</div><div class="stat-value">${DATA.locaties.filter(l=>l.events>0).length}</div><div class="stat-sub">Bespeelde plekken</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="section-title" style="margin-bottom:16px">Genre-verdeling (tickets)</div>${genreData.map(d=>barRow(d,d.c)).join('')}</div>
+        <div class="card"><div class="section-title" style="margin-bottom:16px">Pay What You Can</div>${pwyc.map((d,i)=>barRow(d,i===2?'var(--accent)':'var(--blue)')).join('')}
+          <div style="margin-top:12px;padding:12px;background:var(--surface);border-radius:var(--radius-sm);font-size:12px;color:var(--muted)">Gemiddelde bijdrage: EUR 18,40 per ticket. 72% kiest niveau 2-4.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Publieksprofiel -->
+    <div id="rap-tab-publiek" class="tab-content">
+      <div class="grid-2">
+        <div class="card"><div class="section-title" style="margin-bottom:16px">Leeftijdsverdeling</div>${ageData.map(d=>barRow(d,'var(--blue)')).join('')}</div>
+        <div class="card"><div class="section-title" style="margin-bottom:16px">Geografische herkomst</div>${geoData.map(d=>barRow(d,'var(--accent)')).join('')}</div>
+      </div>
+      <div class="grid-2" style="margin-top:20px">
+        <div class="card"><div class="section-title" style="margin-bottom:16px">Taalvoorkeur</div>${taalData.map(d=>barRow(d,'var(--purple)')).join('')}
+          <div style="margin-top:12px;padding:12px;background:var(--surface);border-radius:var(--radius-sm);font-size:12px;color:var(--muted)">Brussel-specifiek: 42% van het publiek prefereert niet-NL communicatie. Drietalige campagnes bereiken significant meer.</div>
+        </div>
+        <div class="card"><div class="section-title" style="margin-bottom:16px">Publieksopbouw</div>
+          ${DATA.journey.stages.map(s=>barRow({l:s.name,v:s.pct},s.color)).join('')}
+          <div style="margin-top:12px">
+            <div class="detail-row"><span class="detail-label">Retentie (terugkeer volgend seizoen)</span><span class="detail-value">31%</span></div>
+            <div class="detail-row"><span class="detail-label">Gem. bezoeken per bezoeker</span><span class="detail-value">2,4</span></div>
+            <div class="detail-row"><span class="detail-label">Churn-risico contacten</span><span class="detail-value">${DATA.journey.atRisk.length}</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:20px"><div class="section-title" style="margin-bottom:16px">Toegankelijkheid</div>
+        <div class="grid-3">
+          <div><div class="detail-row"><span class="detail-label">Gebarentolk</span><span class="detail-value">${DATA.toegankelijkheid.performances.filter(p=>p.signLang).length} voorstellingen</span></div>
+          <div class="detail-row"><span class="detail-label">Audiodescriptie</span><span class="detail-value">${DATA.toegankelijkheid.performances.filter(p=>p.audioDesc).length} voorstellingen</span></div></div>
+          <div><div class="detail-row"><span class="detail-label">Boventitels</span><span class="detail-value">${DATA.toegankelijkheid.performances.filter(p=>p.surtitles).length} voorstellingen</span></div>
+          <div class="detail-row"><span class="detail-label">Prikkelarm</span><span class="detail-value">${DATA.toegankelijkheid.performances.filter(p=>p.sensoryFriendly).length} voorstellingen</span></div></div>
+          <div><div class="detail-row"><span class="detail-label">Bezoekers met nood</span><span class="detail-value">${Object.values(DATA.toegankelijkheid.patronNeeds).reduce((a,b)=>a+b,0)}</span></div>
+          <div class="detail-row"><span class="detail-label">Rolstoelcapaciteit</span><span class="detail-value">${DATA.toegankelijkheid.venueMatrix.reduce((a,v)=>a+v.wheelchairSeats,0)} plaatsen</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Per productie -->
+    <div id="rap-tab-producties" class="tab-content">
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>Productie</th><th>Genre</th><th>Locatie</th><th style="text-align:right">Capaciteit</th><th style="text-align:right">Verkocht</th><th style="text-align:right">Bezetting</th><th style="text-align:right">Campagnes</th></tr></thead>
+        <tbody>${DATA.productions.filter(p=>p.capacity>0).sort((a,b)=>pct(b.sold,b.capacity)-pct(a.sold,a.capacity)).map(p=>{
+          const sp=pct(p.sold,p.capacity);
+          const camps=DATA.campaigns.filter(c=>c.production===p.id).length;
+          return `<tr onclick="navigate('productie-detail',{productionId:${p.id}})">
+            <td><div class="contact-name">${p.title}</div><div class="contact-email">${p.artist}</div></td>
+            <td>${genreTag(p.genre)}</td>
+            <td style="color:var(--muted)">${p.venue}</td>
+            <td style="text-align:right">${p.capacity}</td>
+            <td style="text-align:right;font-weight:600">${p.sold}</td>
+            <td style="text-align:right"><span style="font-weight:600;color:${sp>=90?'var(--coral)':sp>=60?'var(--accent)':'var(--amber)'}">${sp}%</span></td>
+            <td style="text-align:right">${camps||'—'}</td>
+          </tr>`;
+        }).join('')}</tbody></table>
+      </div>
+    </div>
+
+    <!-- TAB: Communicatie -->
+    <div id="rap-tab-communicatie" class="tab-content">
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="card"><div class="stat-label">Campagnes verstuurd</div><div class="stat-value">${DATA.campaigns.filter(c=>c.status==='Verstuurd').length}</div><div class="stat-sub">Dit seizoen</div></div>
+        <div class="card"><div class="stat-label">Gem. open rate</div><div class="stat-value">38,7%</div><div class="stat-sub">Sector: 28%</div></div>
+        <div class="card"><div class="stat-label">Gem. click rate</div><div class="stat-value">6,2%</div><div class="stat-sub">Sector: 3,8%</div></div>
+        <div class="card"><div class="stat-label">Tickets via campagnes</div><div class="stat-value">${DATA.campaigns.filter(c=>c.tickets).reduce((a,c)=>a+c.tickets,0)}</div><div class="stat-sub">Directe conversie</div></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>Campagne</th><th>Segment</th><th style="text-align:right">Ontvangers</th><th style="text-align:right">Open rate</th><th style="text-align:right">Click rate</th><th style="text-align:right">Tickets</th></tr></thead>
+        <tbody>${DATA.campaigns.filter(c=>c.openRate).map(c=>`<tr onclick="navigate('campagne-detail',{campaignId:${c.id}})">
+          <td class="contact-name">${c.name}</td>
+          <td style="color:var(--muted);font-size:12px">${c.segment}</td>
+          <td style="text-align:right">${fmtN(c.recipients)}</td>
+          <td style="text-align:right;font-weight:600">${c.openRate}%</td>
+          <td style="text-align:right;font-weight:600">${c.clickRate}%</td>
+          <td style="text-align:right;font-weight:600;color:var(--accent)">${c.tickets||'—'}</td>
+        </tr>`).join('')}</tbody></table>
+      </div>
+    </div>
+
+    <!-- TAB: Kunstendecreet (KIOSK cijferbijlage) -->
+    <div id="rap-tab-kunstendecreet" class="tab-content">
+      <div class="card" style="margin-bottom:20px;padding:20px;background:var(--accent-light);border-color:#C5E8DC">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:12px">
+            ${ICONS.check}
+            <div><div style="font-weight:600;color:#137D5F">Klaar voor verantwoording seizoen ${DATA.org.season}</div><div style="font-size:13px;color:#137D5F;margin-top:2px">Deadline indiening KIOSK: 31 mei 2026. Alle verplichte velden zijn ingevuld.</div></div>
+          </div>
+          <button class="btn btn-primary btn-sm">${ICONS.download} Genereer cijferbijlage (Excel)</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:16px">Tab 2: Activiteiten (cijferbijlage)</div>
+          <div class="detail-row"><span class="detail-label">Producties / presentaties</span><span class="detail-value">${DATA.productions.filter(p=>p.genre!=='Conversatie').length}</span></div>
+          <div class="detail-row"><span class="detail-label">Totaal speelbeurten</span><span class="detail-value">${DATA.productions.reduce((a,p)=>{const d=p.dates;const m=d.match(/(\d+)-(\d+)/);return a+(m?parseInt(m[2])-parseInt(m[1])+1:1)},0)}</span></div>
+          <div class="detail-row"><span class="detail-label">Educatieve activiteiten / workshops</span><span class="detail-value">${DATA.productions.filter(p=>p.genre==='Conversatie').length}</span></div>
+          <div class="detail-row"><span class="detail-label">Totaal bezoekers / deelnemers</span><span class="detail-value">${fmtN(DATA.stats.ticketsSold)}</span></div>
+          <div class="detail-row"><span class="detail-label">Unieke bezoekers</span><span class="detail-value">${fmtN(DATA.stats.activeVisitors)}</span></div>
+          <div class="detail-row"><span class="detail-label">Gemiddelde bezettingsgraad</span><span class="detail-value">${pct(DATA.productions.filter(p=>p.capacity>0).reduce((a,p)=>a+p.sold,0),DATA.productions.filter(p=>p.capacity>0).reduce((a,p)=>a+p.capacity,0))}%</span></div>
+          <div class="detail-row"><span class="detail-label">Coproducties</span><span class="detail-value">4</span></div>
+          <div class="detail-row"><span class="detail-label">Disciplines</span><span class="detail-value">Dans, Theater, Performance, Conversatie</span></div>
+          <div class="detail-row"><span class="detail-label">Bespeelde locaties</span><span class="detail-value">${DATA.locaties.filter(l=>l.events>0).length} (${DATA.locaties.filter(l=>l.events>0&&l.type==='Eigen').length} eigen, ${DATA.locaties.filter(l=>l.events>0&&l.type==='Partner').length} partner)</span></div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-bottom:16px">Tab 3-4: Personeel</div>
+          <div class="detail-row"><span class="detail-label">Werknemers met RSZ</span><span class="detail-value">42 (32,5 FTE)</span></div>
+          <div class="detail-row"><span class="detail-label">Medewerkers zonder RSZ (freelance)</span><span class="detail-value">68</span></div>
+          <div class="detail-row"><span class="detail-label">Genderverdeling personeel</span><span class="detail-value">52% V / 45% M / 3% X</span></div>
+          <div class="detail-row"><span class="detail-label">Herkomst (buitenlandse afkomst)</span><span class="detail-value">24%</span></div>
+          <div class="detail-row"><span class="detail-label">Medewerkers met handicap</span><span class="detail-value">2 (streefcijfer: 3%)</span></div>
+          <div class="detail-row"><span class="detail-label">Fair practice: verloning conform CAO</span><span class="detail-value" style="color:var(--accent)">Ja</span></div>
+          <div class="detail-row"><span class="detail-label">Vrijwilligers</span><span class="detail-value">${DATA.vrijwilligers.stats.total} (${fmtN(DATA.vrijwilligers.stats.totalHours)} uren)</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="section-title" style="margin-bottom:16px">Publieksbereik & diversiteit</div>
+        <div class="grid-3">
+          <div>
+            <div class="detail-row"><span class="detail-label">Nieuw publiek</span><span class="detail-value">${DATA.stats.newVisitorPct}%</span></div>
+            <div class="detail-row"><span class="detail-label">Jongeren (&lt;26)</span><span class="detail-value">31%</span></div>
+            <div class="detail-row"><span class="detail-label">65+</span><span class="detail-value">8%</span></div>
+          </div>
+          <div>
+            <div class="detail-row"><span class="detail-label">Brussel (lokaal)</span><span class="detail-value">62%</span></div>
+            <div class="detail-row"><span class="detail-label">Vlaanderen</span><span class="detail-value">24%</span></div>
+            <div class="detail-row"><span class="detail-label">Internationaal</span><span class="detail-value">14%</span></div>
+          </div>
+          <div>
+            <div class="detail-row"><span class="detail-label">UiTPAS-houders</span><span class="detail-value">847</span></div>
+            <div class="detail-row"><span class="detail-label">Kansentarief-opnames</span><span class="detail-value">312</span></div>
+            <div class="detail-row"><span class="detail-label">Toegankelijke voorstellingen</span><span class="detail-value">${DATA.toegankelijkheid.performances.filter(p=>p.signLang||p.audioDesc||p.surtitles||p.sensoryFriendly).length}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="section-title" style="margin-bottom:16px">Internationale werking</div>
+        <div class="detail-row"><span class="detail-label">Internationale coproducties</span><span class="detail-value">3</span></div>
+        <div class="detail-row"><span class="detail-label">Buitenlandse speelbeurten (touring)</span><span class="detail-value">12</span></div>
+        <div class="detail-row"><span class="detail-label">Landen bereikt</span><span class="detail-value">7 (NL, FR, DE, UK, CH, AT, NO)</span></div>
+        <div class="detail-row"><span class="detail-label">Internationale artiesten in programma</span><span class="detail-value">8 van ${DATA.productions.length}</span></div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="section-header"><div class="section-title">Inhoudelijk verslag (narratief)</div><button class="btn btn-secondary btn-sm">Bewerk tekst</button></div>
+        <div style="font-size:13px;color:var(--body);line-height:1.7">
+          <p style="margin-bottom:12px">Kaaitheater bereikt een jong en divers publiek in een meertalige hoofdstad. 31% is jonger dan 26, 42% communiceert bij voorkeur in een andere taal dan het Nederlands. Het Pay What You Can-model verlaagt de financiele drempel structureel: 40% kiest prijsniveau 1 of 2.</p>
+          <p style="margin-bottom:12px">De nomadische periode resulteerde in een verbreding van het bereik: door te spelen op ${DATA.locaties.filter(l=>l.events>0).length} locaties bereiken we wijken en publieken die het Saincteletteplein minder frequenteerden. GC De Kriekelaar (Schaarbeek) bracht structureel nieuw lokaal publiek. De samenwerking met KVS en Theatre National voor grotere producties versterkte de cross-community werking in Brussel.</p>
+          <p>Op vlak van toegankelijkheid boden we ${DATA.toegankelijkheid.performances.filter(p=>p.signLang||p.audioDesc||p.surtitles||p.sensoryFriendly).length} voorstellingen met voorzieningen. ${Object.values(DATA.toegankelijkheid.patronNeeds).reduce((a,b)=>a+b,0)} contacten hebben een geregistreerde nood. De Foyer Matinee-reeks (prikkelarm, gratis) trekt een publiek dat we anders niet bereiken.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Financieel -->
+    <div id="rap-tab-financieel" class="tab-content">
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="card"><div class="stat-label">Totale inkomsten</div><div class="stat-value" style="font-size:22px">EUR ${fmtN(3845000)}</div><div class="stat-sub">Seizoen ${DATA.org.season}</div></div>
+        <div class="card"><div class="stat-label">Eigen inkomsten</div><div class="stat-value" style="font-size:22px">EUR ${fmtN(824600)}</div><div class="stat-sub">21,4% — boven minimum 12,5%</div></div>
+        <div class="card"><div class="stat-label">Subsidie-afhankelijkheid</div><div class="stat-value" style="font-size:22px">78,6%</div><div class="stat-sub">Sector gem. 72%</div></div>
+        <div class="card"><div class="stat-label">Kost per bezoeker</div><div class="stat-value" style="font-size:22px">EUR 91</div><div class="stat-sub">Incl. alle kosten</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:16px">Inkomsten (Tab 5: Begroting)</div>
+          <div class="detail-row"><span class="detail-label">Werkingssubsidie Vlaamse Gemeenschap</span><span class="detail-value">EUR ${fmtN(2764800)}</span></div>
+          <div class="detail-row"><span class="detail-label">Werkingssubsidie VGC</span><span class="detail-value">EUR ${fmtN(280000)}</span></div>
+          <div class="detail-row"><span class="detail-label">Projectsubsidies</span><span class="detail-value">EUR ${fmtN(45000)}</span></div>
+          <div class="detail-row" style="border-top:2px solid var(--border);font-weight:600"><span class="detail-label" style="color:var(--ink)">Subtotaal subsidies</span><span class="detail-value">EUR ${fmtN(3089800)}</span></div>
+          <div class="detail-row"><span class="detail-label">Ticketverkoop</span><span class="detail-value">EUR ${fmtN(Math.round(DATA.stats.ticketsSold*18.4))}</span></div>
+          <div class="detail-row"><span class="detail-label">Sponsoring & mecenaat</span><span class="detail-value">EUR ${fmtN(28000)}</span></div>
+          <div class="detail-row"><span class="detail-label">Vriendenkring</span><span class="detail-value">EUR ${fmtN(DATA.lidmaatschap.stats.revenue)}</span></div>
+          <div class="detail-row"><span class="detail-label">Horeca & verhuur</span><span class="detail-value">EUR ${fmtN(18200)}</span></div>
+          <div class="detail-row" style="border-top:2px solid var(--border);font-weight:600"><span class="detail-label" style="color:var(--ink)">Subtotaal eigen inkomsten</span><span class="detail-value">EUR ${fmtN(824600)}</span></div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-bottom:16px">Uitgaven</div>
+          <div class="detail-row"><span class="detail-label">Personeelskosten (RSZ)</span><span class="detail-value">EUR ${fmtN(1840000)}</span></div>
+          <div class="detail-row"><span class="detail-label">Medewerkers zonder RSZ (freelance)</span><span class="detail-value">EUR ${fmtN(620000)}</span></div>
+          <div class="detail-row"><span class="detail-label">Productiekosten (artistiek + technisch)</span><span class="detail-value">EUR ${fmtN(480000)}</span></div>
+          <div class="detail-row"><span class="detail-label">Huisvesting & locatiehuur</span><span class="detail-value">EUR ${fmtN(320000)}</span></div>
+          <div class="detail-row"><span class="detail-label">Communicatie & marketing</span><span class="detail-value">EUR ${fmtN(185000)}</span></div>
+          <div class="detail-row"><span class="detail-label">Administratie & overhead</span><span class="detail-value">EUR ${fmtN(240000)}</span></div>
+          <div class="detail-row"><span class="detail-label">Afschrijvingen</span><span class="detail-value">EUR ${fmtN(160000)}</span></div>
+          <div class="detail-row" style="border-top:2px solid var(--border);font-weight:600"><span class="detail-label" style="color:var(--ink)">Totaal uitgaven</span><span class="detail-value">EUR ${fmtN(3845000)}</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="section-title" style="margin-bottom:16px">Financiele ratio's</div>
+        <div class="grid-3">
+          <div>
+            <div class="detail-row"><span class="detail-label">Eigen inkomsten ratio</span><span class="detail-value" style="color:var(--accent)">21,4%</span></div>
+            <div style="font-size:11px;color:var(--muted);padding:4px 0">Minimum vereist: 12,5%. Sector gem.: 38%</div>
+          </div>
+          <div>
+            <div class="detail-row"><span class="detail-label">Personeelskosten ratio</span><span class="detail-value">64%</span></div>
+            <div style="font-size:11px;color:var(--muted);padding:4px 0">Personeelskosten / totale uitgaven</div>
+          </div>
+          <div>
+            <div class="detail-row"><span class="detail-label">Kostendekkingsgraad</span><span class="detail-value">100,0%</span></div>
+            <div style="font-size:11px;color:var(--muted);padding:4px 0">Inkomsten / uitgaven — in balans</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Beheersovereenkomst KPI's -->
+    <div id="rap-tab-kpis" class="tab-content">
+      <div class="card" style="margin-bottom:20px;padding:20px;background:var(--blue-light);border-color:#BDD5F7">
+        <div style="font-weight:600;color:#1A5FB4">Beheersovereenkomst 2023 – 2032</div>
+        <div style="font-size:13px;color:#1A5FB4;margin-top:4px">KPI's afgesproken met Departement Cultuur, Jeugd en Media. Evaluatie: 2027 (mid-term) en 2032 (eind).</div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>KPI</th><th>Doelstelling</th><th style="text-align:right">Baseline (22-23)</th><th style="text-align:right">Target (26-27)</th><th style="text-align:right">Huidig</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="contact-name">Unieke bezoekers per seizoen</td><td style="color:var(--muted);font-size:12px">Publieksgroei na heropening</td><td style="text-align:right">3.200</td><td style="text-align:right">5.000</td><td style="text-align:right;font-weight:700">3.847</td><td><span class="tag tag-green">Op schema</span></td></tr>
+          <tr><td class="contact-name">Bezettingsgraad</td><td style="color:var(--muted);font-size:12px">Optimalisatie zaalbezetting</td><td style="text-align:right">68%</td><td style="text-align:right">80%</td><td style="text-align:right;font-weight:700">78,4%</td><td><span class="tag tag-green">Op schema</span></td></tr>
+          <tr><td class="contact-name">Nieuw publiek</td><td style="color:var(--muted);font-size:12px">Publieksvernieuwing</td><td style="text-align:right">24%</td><td style="text-align:right">30%</td><td style="text-align:right;font-weight:700">32%</td><td><span class="tag tag-green">Behaald</span></td></tr>
+          <tr><td class="contact-name">Jongeren (&lt;26)</td><td style="color:var(--muted);font-size:12px">Verjonging publiek</td><td style="text-align:right">22%</td><td style="text-align:right">28%</td><td style="text-align:right;font-weight:700">31%</td><td><span class="tag tag-green">Behaald</span></td></tr>
+          <tr><td class="contact-name">Internationale speelbeurten</td><td style="color:var(--muted);font-size:12px">Int. uitstraling</td><td style="text-align:right">8</td><td style="text-align:right">15</td><td style="text-align:right;font-weight:700">12</td><td><span class="tag tag-green">Op schema</span></td></tr>
+          <tr><td class="contact-name">Eigen inkomsten ratio</td><td style="color:var(--muted);font-size:12px">Financiele zelfredzaamheid</td><td style="text-align:right">18%</td><td style="text-align:right">22%</td><td style="text-align:right;font-weight:700">21,4%</td><td><span class="tag tag-green">Op schema</span></td></tr>
+          <tr><td class="contact-name">Kansentarief-deelnames</td><td style="color:var(--muted);font-size:12px">Drempelverlagend bereik</td><td style="text-align:right">180</td><td style="text-align:right">400</td><td style="text-align:right;font-weight:700">312</td><td><span class="tag tag-green">Op schema</span></td></tr>
+          <tr><td class="contact-name">Diversiteit personeel</td><td style="color:var(--muted);font-size:12px">Weerspiegeling samenleving</td><td style="text-align:right">18%</td><td style="text-align:right">25%</td><td style="text-align:right;font-weight:700">24%</td><td><span class="tag tag-green">Op schema</span></td></tr>
+          <tr><td class="contact-name">Toegankelijke voorstellingen</td><td style="color:var(--muted);font-size:12px">Inclusief aanbod</td><td style="text-align:right">2</td><td style="text-align:right">6</td><td style="text-align:right;font-weight:700">${DATA.toegankelijkheid.performances.filter(p=>p.signLang||p.audioDesc||p.surtitles||p.sensoryFriendly).length}</td><td><span class="tag tag-amber">Aandacht</span></td></tr>
+          <tr><td class="contact-name">Bespeelde locaties Brussel</td><td style="color:var(--muted);font-size:12px">Nomadische aanwezigheid</td><td style="text-align:right">8</td><td style="text-align:right">10</td><td style="text-align:right;font-weight:700">${DATA.locaties.filter(l=>l.events>0).length}</td><td><span class="tag tag-amber">Aandacht</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+  </div>`;
+}
+function switchRapTab(tab){$$('#screen-rapportage .tab').forEach(t=>t.classList.remove('active'));$$('#screen-rapportage .tab-content').forEach(t=>t.classList.remove('active'));event.target.classList.add('active');$(`#rap-tab-${tab}`).classList.add('active');}
+
+// ── 10. GASTENLIJSTEN ──
+function renderGastenlijsten() {
+  const el = $('#screen-gastenlijsten');
+  const upcoming = DATA.productions.filter(p=>p.status!=='Afgelopen').slice(0,6);
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Hospitality</h1><div class="topbar-sub">Gastenlijsten, VIP-beheer en uitnodigingen per productie</div></div></div>
+  <div class="content">
+    <div class="section-header"><div class="section-title">Komende producties</div></div>
+    <div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Productie</th><th>Datum</th><th>Gasten</th><th>Bevestigd</th><th></th></tr></thead>
+    <tbody>${upcoming.map(p=>{
+      const gl = DATA.guestLists.find(g=>g.productionId===p.id);
+      const total = gl?gl.guests.length:0;
+      const confirmed = gl?gl.guests.filter(g=>g.status==='Bevestigd').length:0;
+      return `<tr onclick="navigate('productie-detail',{productionId:${p.id}})"><td><div class="contact-name">${p.title}</div><div class="contact-email">${p.artist}</div></td><td style="color:var(--muted)">${p.dates}</td><td style="font-weight:600">${total}</td><td>${total>0?`<span class="tag tag-green">${confirmed}/${total}</span>`:'<span style="color:var(--muted)">—</span>'}</td><td><button class="btn btn-secondary btn-sm">${ICONS.plus} Gasten</button></td></tr>`;
+    }).join('')}</tbody></table></div>
+  </div>`;
+}
+
+// ── 11. SYNC ──
+function renderSync() {
+  const el = $('#screen-sync');
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Koppelingen</h1><div class="topbar-sub">Verbonden systemen, synchronisatie en datakwaliteit</div></div><div class="topbar-actions"><button class="btn btn-primary btn-sm">${ICONS.refresh} Alles synchroniseren</button></div></div>
+  <div class="content">
+    <div class="card section"><div class="section-title" style="margin-bottom:14px">Sync log</div>
+      ${DATA.syncLog.map(s=>`<div class="act-item"><div class="act-icon" style="background:${s.status==='ok'?'var(--accent-light)':'var(--amber-light)'};color:${s.status==='ok'?'var(--accent)':'var(--amber)'}">${s.status==='ok'?ICONS.check:'!'}</div><div><div class="act-title">${s.source}</div><div class="act-sub">${s.msg}</div></div><div class="act-time">${s.time}</div></div>`).join('')}
+    </div>
+    <div class="card section"><div class="section-header"><div class="section-title">Voorgestelde merges (deduplicatie)</div><span class="tag tag-amber">${DATA.duplicates.length} te beoordelen</span></div>
+      <table><thead><tr><th>Contact A</th><th>Contact B</th><th>Match</th><th>Confidence</th><th></th></tr></thead>
+      <tbody>${DATA.duplicates.map(d=>`<tr><td class="contact-name">${d.a}</td><td class="contact-name">${d.b}</td><td style="color:var(--muted);font-size:11px">${d.field}</td><td><span class="tag tag-${d.confidence>=90?'green':'amber'}">${d.confidence}%</span></td><td><button class="btn btn-primary btn-sm">Merge</button><button class="btn btn-ghost btn-sm">Negeer</button></td></tr>`).join('')}</tbody></table>
+    </div>
+    <div class="card"><div class="section-title" style="margin-bottom:14px">Verbonden bronnen</div>
+      ${DATA.sources.map(s=>`<div class="sync-row"><div class="sync-icon" style="background:${s.color}">${s.short}</div><div><div class="sync-name">${s.name}</div><div class="sync-meta">${s.desc}</div></div><div class="sync-right"><div style="font-size:13px;font-weight:600;color:var(--ink)">${fmtN(s.contacts)} contacten</div><div class="sync-meta">Laatste sync: ${s.lastSync}</div></div><span class="tag tag-green">${s.status}</span></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ── 12. INSTELLINGEN ──
+function renderInstellingen() {
+  const el = $('#screen-instellingen');
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Instellingen</h1><div class="topbar-sub">Configuratie, gebruikers en modules</div></div></div>
+  <div class="content">
+    <div class="grid-2">
+      <div class="card section"><div class="section-title" style="margin-bottom:14px">Organisatie</div>
+        <div class="detail-row"><span class="detail-label">Naam</span><span class="detail-value">${DATA.org.name}</span></div>
+        <div class="detail-row"><span class="detail-label">Seizoen</span><span class="detail-value">${DATA.org.season}</span></div>
+        <div class="detail-row"><span class="detail-label">Stad</span><span class="detail-value">${DATA.org.city}</span></div>
+        <div class="detail-row"><span class="detail-label">Taal</span><span class="detail-value">NL (FR, EN beschikbaar)</span></div>
+      </div>
+      <div class="card section"><div class="section-title" style="margin-bottom:14px">Gebruikers</div>
+        ${DATA.settings.users.map(u=>`<div class="detail-row"><span class="detail-label"><strong style="color:var(--ink)">${u.name}</strong><br><span style="font-size:11px">${u.email}</span></span><span class="detail-value"><span class="tag tag-${u.role==='Admin'?'coral':'default'}">${u.role}</span></span></div>`).join('')}
+        <button class="btn btn-secondary btn-sm" style="margin-top:10px">${ICONS.plus} Gebruiker toevoegen</button>
+      </div>
+    </div>
+    <div class="card"><div class="section-title" style="margin-bottom:14px">Modules (feature toggles)</div>
+      ${DATA.settings.features.map(f=>`<div class="consent-row"><div><strong style="color:var(--ink)">${f.name}</strong><div style="font-size:11px;color:var(--muted)">${f.desc}</div></div><div class="toggle ${f.on?'on':''}" onclick="this.classList.toggle('on')"></div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ── 13. PATRON JOURNEY ──
+function renderJourney() {
+  const j = DATA.journey;
+  const el = $('#screen-journey');
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Publieksopbouw</h1><div class="topbar-sub">Van eerste bezoek tot ambassadeur — hoe groeit je publiek?</div></div></div>
+  <div class="content">
+    <div class="card section">
+      <div class="section-title" style="margin-bottom:24px">De reis van je publiek</div>
+      <div style="display:flex;gap:0;align-items:stretch">
+        ${j.stages.map((s,i)=>`<div style="flex:${s.pct};min-width:0;padding:20px;background:${s.color};color:white;${i===0?'border-radius:var(--radius) 0 0 var(--radius)':''}${i===j.stages.length-1?'border-radius:0 var(--radius) var(--radius) 0':''}">
+          <div style="font-size:24px;font-weight:700">${fmtN(s.count)}</div>
+          <div style="font-size:13px;font-weight:600;margin-top:4px">${s.name}</div>
+          <div style="font-size:11px;opacity:.8;margin-top:2px">${s.pct}%</div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:16px">Conversie tussen stappen</div>
+        ${j.transitions.map(t=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+          <div><span style="font-weight:600;color:var(--ink)">${t.from}</span> <span style="color:var(--muted);margin:0 8px">&rarr;</span> <span style="font-weight:600;color:var(--ink)">${t.to}</span></div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:100px;height:6px;background:#EAECF0;border-radius:3px;overflow:hidden"><div style="height:100%;width:${t.rate}%;background:var(--accent);border-radius:3px"></div></div>
+            <span style="font-weight:700;color:var(--ink);width:36px;text-align:right">${t.rate}%</span>
+            <span style="font-size:12px;color:${t.trend.startsWith('+')?'var(--accent)':'var(--coral)'};font-weight:600">${t.trend}</span>
+          </div>
+        </div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="section-header"><div class="section-title">Churn-risico</div><span class="tag tag-coral">${j.atRisk.length} contacten</span></div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Bezoekers die dreigen af te haken op basis van gedragspatronen.</p>
+        ${j.atRisk.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+          <div><div style="font-weight:600;color:var(--ink)">${c.name}</div><div style="font-size:12px;color:var(--muted)">Stadium: ${c.stage}</div></div>
+          <div style="text-align:right"><div style="font-size:12px;color:var(--coral);font-weight:600">${c.risk}</div><div style="font-size:11px;color:var(--muted)">Laatste bezoek: ${c.lastVisit}</div></div>
+        </div>`).join('')}
+        <button class="btn btn-primary btn-sm" style="margin-top:16px;width:100%">Re-engagement campagne starten</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── 14. FUNDRAISING ──
+function renderFundraising() {
+  const f = DATA.fundraising;
+  const el = $('#screen-fundraising');
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Donaties & sponsors</h1><div class="topbar-sub">Individuele giften, sponsorcontracten en subsidies</div></div></div>
+  <div class="content">
+    <div class="stats-grid">
+      <div class="card"><div class="stat-label">Donateurs</div><div class="stat-value">${f.summary.totalDonors}</div><div class="stat-sub">Actieve gevers</div></div>
+      <div class="card"><div class="stat-label">Opgehaald (seizoen)</div><div class="stat-value">&euro; ${fmtN(f.summary.totalRaised)}</div><div class="stat-sub">Via donaties en vriendenkring</div></div>
+      <div class="card"><div class="stat-label">Gem. gift</div><div class="stat-value">&euro; ${f.summary.avgGift}</div><div class="stat-sub">Per donatie</div></div>
+      <div class="card"><div class="stat-label">Vriendenleden</div><div class="stat-value">${f.summary.friendsMembers}</div><div class="stat-sub">Actieve leden</div></div>
+    </div>
+
+    <div class="tabs" id="fund-tabs">
+      <button class="tab active" onclick="switchFundTab('donaties')">Donaties</button>
+      <button class="tab" onclick="switchFundTab('sponsoring')">Sponsoring</button>
+      <button class="tab" onclick="switchFundTab('subsidies')">Subsidies & grants</button>
+    </div>
+
+    <div id="fund-tab-donaties" class="tab-content active">
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>Donateur</th><th>Type</th><th style="text-align:right">Bedrag</th><th>Datum</th><th>Terugkerend</th></tr></thead>
+        <tbody>${f.donors.map(d=>`<tr><td class="contact-name">${d.name}</td><td><span class="tag tag-${d.type==='Mecenas'?'coral':d.type==='Vriend'?'green':'blue'}">${d.type}</span></td><td style="text-align:right;font-weight:700">&euro; ${d.amount}</td><td style="color:var(--muted)">${d.date}</td><td>${d.recurring?'<span class="tag tag-green">Maandelijks</span>':'<span class="tag tag-default">Eenmalig</span>'}</td></tr>`).join('')}</tbody></table>
+      </div>
+    </div>
+    <div id="fund-tab-sponsoring" class="tab-content">
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>Sponsor</th><th>Type</th><th style="text-align:right">Bedrag</th><th>Contract</th><th>Status</th></tr></thead>
+        <tbody>${f.sponsors.map(s=>`<tr><td class="contact-name">${s.name}</td><td><span class="tag tag-blue">${s.type}</span></td><td style="text-align:right;font-weight:700">&euro; ${fmtN(s.amount)}</td><td style="color:var(--muted)">${s.contract}</td><td><span class="tag tag-green">${s.status}</span></td></tr>`).join('')}</tbody></table>
+      </div>
+    </div>
+    <div id="fund-tab-subsidies" class="tab-content">
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>Subsidie</th><th>Verstrekker</th><th style="text-align:right">Bedrag</th><th>Periode</th><th>Status</th></tr></thead>
+        <tbody>${f.grants.map(g=>`<tr><td class="contact-name">${g.name}</td><td style="color:var(--muted)">${g.funder}</td><td style="text-align:right;font-weight:700">&euro; ${fmtN(g.amount)}</td><td style="color:var(--muted)">${g.period}</td><td><span class="tag tag-${g.status==='Actief'?'green':g.status==='Aangevraagd'?'amber':'default'}">${g.status}</span>${g.deadline?`<div style="font-size:11px;color:var(--coral);margin-top:2px">Deadline: ${g.deadline}</div>`:''}</td></tr>`).join('')}</tbody></table>
+      </div>
+    </div>
+  </div>`;
+}
+function switchFundTab(tab){$$('#screen-fundraising .tab').forEach(t=>t.classList.remove('active'));$$('#screen-fundraising .tab-content').forEach(t=>t.classList.remove('active'));event.target.classList.add('active');$(`#fund-tab-${tab}`).classList.add('active');}
+
+// ── 15. VRIJWILLIGERS ──
+function renderVrijwilligers() {
+  const v = DATA.vrijwilligers;
+  const el = $('#screen-vrijwilligers');
+  const openShiftsTotal = v.upcoming.reduce((a,u)=>a+(u.needed-u.filled),0);
+  const skillCounts = {};
+  v.list.forEach(f=>f.skills.forEach(s=>{skillCounts[s]=(skillCounts[s]||0)+1}));
+
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Vrijwilligers</h1><div class="topbar-sub">${v.stats.total} vrijwilligers — ${fmtN(v.stats.totalHours)} uren dit seizoen</div></div><div class="topbar-actions"><button class="btn btn-secondary btn-sm">${ICONS.download} Uren-export</button><button class="btn btn-primary btn-sm">${ICONS.plus} Vrijwilliger toevoegen</button></div></div>
+  <div class="content">
+
+    <!-- Stats -->
+    <div class="stats-grid" style="grid-template-columns:repeat(5,1fr)">
+      <div class="card"><div class="stat-label">Actief</div><div class="stat-value">${v.stats.activeThisSeason}<span style="font-size:14px;color:var(--muted);font-weight:400"> / ${v.stats.total}</span></div><div class="stat-sub">${v.stats.newThisSeason} nieuw dit seizoen</div></div>
+      <div class="card"><div class="stat-label">Uren (seizoen)</div><div class="stat-value">${fmtN(v.stats.totalHours)}</div><div class="stat-sub">Voor subsidie-rapportage</div></div>
+      <div class="card"><div class="stat-label">Open shifts</div><div class="stat-value" style="color:${openShiftsTotal>0?'var(--amber)':'var(--accent)'}">${openShiftsTotal}</div><div class="stat-sub">Over ${v.upcoming.length} producties</div></div>
+      <div class="card"><div class="stat-label">Retentie</div><div class="stat-value">${v.stats.retentionRate}%</div><div class="stat-sub">Terugkeer tov vorig seizoen</div></div>
+      <div class="card"><div class="stat-label">Tevredenheid</div><div class="stat-value">${v.stats.satisfactionScore}</div><div class="stat-sub">Uit 10 — laatste enquete</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="vol-tabs">
+      <button class="tab active" onclick="switchVolTab('planning')">Shiftplanning</button>
+      <button class="tab" onclick="switchVolTab('team')">Team</button>
+      <button class="tab" onclick="switchVolTab('communicatie')">Communicatie</button>
+      <button class="tab" onclick="switchVolTab('training')">Opleiding & certificaten</button>
+      <button class="tab" onclick="switchVolTab('historiek')">Historiek</button>
+    </div>
+
+    <!-- TAB: Shiftplanning -->
+    <div id="vol-tab-planning" class="tab-content active">
+      ${v.upcoming.map(u=>{
+        const fp = pct(u.filled,u.needed);
+        return `<div class="card" style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+            <div>
+              <div style="font-size:16px;font-weight:600;color:var(--ink)">${u.production}</div>
+              <div style="font-size:13px;color:var(--muted);margin-top:4px">${u.date} — ${u.venue}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="text-align:right">
+                <div style="font-size:13px;font-weight:600;color:${fp===100?'var(--accent)':'var(--amber)'}">${u.filled} / ${u.needed} ingevuld</div>
+                <div class="progress" style="width:100px;margin-top:4px"><div class="progress-fill" style="width:${fp}%;background:${fp===100?'var(--accent)':'var(--amber)'}"></div></div>
+              </div>
+              <button class="btn btn-primary btn-sm">Oproep versturen</button>
+            </div>
+          </div>
+          <table><thead><tr><th>Rol</th><th>Tijd</th><th>Nodig</th><th>Ingevuld</th><th>Vrijwilligers</th><th></th></tr></thead>
+          <tbody>${u.shifts.map(s=>`<tr>
+            <td><span style="font-weight:600;color:var(--ink)">${s.role}</span></td>
+            <td style="color:var(--muted);font-size:12px;white-space:nowrap">${s.time}</td>
+            <td style="text-align:center">${s.needed}</td>
+            <td style="text-align:center"><span style="color:${s.filled>=s.needed?'var(--accent)':'var(--coral)'};font-weight:600">${s.filled}</span></td>
+            <td>${s.volunteers.length>0?s.volunteers.map(v=>`<span class="tag tag-green">${v}</span>`).join(''):`<span style="color:var(--coral);font-size:12px;font-weight:500">Vacature</span>`}</td>
+            <td>${s.filled<s.needed?`<button class="btn btn-secondary btn-sm" onclick="openModal(renderVolAssignModal(${u.id},'${s.role}'))">Toewijzen</button>`:''}</td>
+          </tr>`).join('')}</tbody></table>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- TAB: Team -->
+    <div id="vol-tab-team" class="tab-content">
+      <div class="filters-bar">
+        <input type="text" class="input" placeholder="Zoek vrijwilliger..." style="max-width:280px">
+        <select class="input" style="max-width:150px"><option>Alle vaardigheden</option>${v.roles.map(r=>`<option>${r}</option>`).join('')}</select>
+        <select class="input" style="max-width:140px"><option>Alle statussen</option><option>Actief</option><option>Inactief</option></select>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>Naam</th><th>Vaardigheden</th><th>Beschikbaar</th><th>EHBO</th><th style="text-align:right">Shifts</th><th style="text-align:right">Uren</th><th>Sinds</th><th>Status</th></tr></thead>
+        <tbody>${v.list.map(f=>`<tr onclick="openModal(renderVolDetailModal(${f.id}))" style="cursor:pointer">
+          <td><div class="contact-name">${f.name}</div><div class="contact-email">${f.email}</div></td>
+          <td>${f.skills.map(s=>`<span class="tag tag-default">${s}</span>`).join('')}</td>
+          <td style="color:var(--muted);font-size:12px">${f.available}</td>
+          <td>${f.certEHBO?`<span style="color:var(--accent)">${ICONS.check}</span>`:'<span style="color:var(--muted)">—</span>'}</td>
+          <td style="text-align:right;font-weight:600">${f.shifts}</td>
+          <td style="text-align:right;font-weight:600">${f.hours}u</td>
+          <td style="color:var(--muted);font-size:12px">${f.since}</td>
+          <td><span class="tag tag-${f.status==='Actief'?'green':'default'}">${f.status}</span></td>
+        </tr>`).join('')}</tbody></table>
+      </div>
+      <div style="margin-top:20px"><div class="section-title" style="margin-bottom:12px">Vaardigheden-overzicht</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">${Object.entries(skillCounts).sort((a,b)=>b[1]-a[1]).map(([s,c])=>`<div style="padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px"><span style="font-weight:600;color:var(--ink)">${s}</span> <span style="color:var(--muted)">${c}</span></div>`).join('')}</div>
+      </div>
+    </div>
+
+    <!-- TAB: Communicatie -->
+    <div id="vol-tab-communicatie" class="tab-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="section-title">Berichten aan vrijwilligers</div>
+        <button class="btn btn-primary btn-sm">${ICONS.mail} Nieuw bericht</button>
+      </div>
+      ${v.communications.map(c=>`<div class="card" style="margin-bottom:12px;padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-weight:600;color:var(--ink);font-size:14px">${c.subject}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">${c.date} — ${c.recipients} ontvangers, ${c.opens} geopend (${pct(c.opens,c.recipients)}%)</div>
+          </div>
+          <span class="tag tag-${c.type==='Oproep'?'amber':c.type==='Bedanking'?'green':'blue'}">${c.type}</span>
+        </div>
+      </div>`).join('')}
+      <div class="card" style="background:var(--surface);border-style:dashed;text-align:center;padding:24px;color:var(--muted)">
+        <div style="font-size:13px;font-weight:500">Automatische berichten: shift-herinneringen (24u voor aanvang) en bedankingsmails (dag na shift) zijn actief.</div>
+      </div>
+    </div>
+
+    <!-- TAB: Opleiding & certificaten -->
+    <div id="vol-tab-training" class="tab-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="section-title">Opleidingen</div>
+        <button class="btn btn-primary btn-sm">${ICONS.plus} Opleiding inplannen</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>Opleiding</th><th>Datum</th><th>Deelnemers</th><th>Status</th></tr></thead>
+        <tbody>${v.training.map(t=>`<tr>
+          <td class="contact-name">${t.name}</td>
+          <td style="color:var(--muted)">${t.date}</td>
+          <td style="font-weight:600">${t.attendees>0?t.attendees:'—'}</td>
+          <td><span class="tag tag-${t.status==='Afgerond'?'green':t.status==='Gepland'?'blue':'default'}">${t.status}</span></td>
+        </tr>`).join('')}</tbody></table>
+      </div>
+      <div style="margin-top:20px"><div class="section-title" style="margin-bottom:12px">Certificaten-overzicht</div>
+        <div class="grid-3">
+          <div class="card" style="text-align:center;padding:20px">
+            <div style="font-size:28px;font-weight:700;color:var(--accent)">${v.stats.certEHBO}</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px">EHBO-certificaat</div>
+            <div style="font-size:11px;color:var(--muted)">van ${v.list.length} vrijwilligers</div>
+          </div>
+          <div class="card" style="text-align:center;padding:20px">
+            <div style="font-size:28px;font-weight:700;color:var(--ink)">${v.training.filter(t=>t.status==='Afgerond').length}</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px">Opleidingen afgerond</div>
+            <div style="font-size:11px;color:var(--muted)">dit seizoen</div>
+          </div>
+          <div class="card" style="text-align:center;padding:20px">
+            <div style="font-size:28px;font-weight:700;color:var(--blue)">${v.training.filter(t=>t.status==='Gepland').length}</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px">Gepland</div>
+            <div style="font-size:11px;color:var(--muted)">komende weken</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Historiek -->
+    <div id="vol-tab-historiek" class="tab-content">
+      <div class="section-title" style="margin-bottom:16px">Afgelopen shifts</div>
+      ${v.pastShifts.map(s=>`<div class="card" style="margin-bottom:12px;padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-weight:600;color:var(--ink);font-size:14px">${s.production}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">${s.date}</div>
+          </div>
+          <div style="display:flex;gap:16px;text-align:center">
+            <div><div style="font-size:16px;font-weight:700;color:var(--ink)">${s.totalVolunteers}</div><div style="font-size:10px;color:var(--muted)">Vrijwilligers</div></div>
+            <div><div style="font-size:16px;font-weight:700;color:var(--ink)">${s.totalHours}u</div><div style="font-size:10px;color:var(--muted)">Uren</div></div>
+            <div><div style="font-size:16px;font-weight:700;color:${s.noShows>0?'var(--coral)':'var(--accent)'}">${s.noShows}</div><div style="font-size:10px;color:var(--muted)">No-shows</div></div>
+          </div>
+        </div>
+        ${s.feedback?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;color:var(--body);line-height:1.6">${s.feedback}</div>`:''}
+      </div>`).join('')}
+    </div>
+
+  </div>`;
+}
+
+function switchVolTab(tab){$$('#screen-vrijwilligers .tab').forEach(t=>t.classList.remove('active'));$$('#screen-vrijwilligers .tab-content').forEach(t=>t.classList.remove('active'));event.target.classList.add('active');$(`#vol-tab-${tab}`).classList.add('active');}
+
+// Modal renderers voor vrijwilligers
+function renderVolDetailModal(volId) {
+  const f = DATA.vrijwilligers.list.find(v=>v.id===volId);
+  if(!f) return '<p>Niet gevonden</p>';
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+      <div>
+        <h2 style="margin-bottom:4px">${f.name}</h2>
+        <div style="font-size:13px;color:var(--muted)">${f.email} — ${f.phone}</div>
+      </div>
+      <button class="btn btn-ghost" onclick="closeModal()" style="font-size:18px">&times;</button>
+    </div>
+    <div style="display:flex;gap:4px;margin-bottom:20px">${f.skills.map(s=>`<span class="tag tag-default">${s}</span>`).join('')}<span class="tag tag-${f.status==='Actief'?'green':'default'}">${f.status}</span>${f.certEHBO?'<span class="tag tag-blue">EHBO</span>':''}</div>
+    <div class="detail-row"><span class="detail-label">Beschikbaarheid</span><span class="detail-value">${f.available}</span></div>
+    <div class="detail-row"><span class="detail-label">Vrijwilliger sinds</span><span class="detail-value">${f.since}</span></div>
+    <div class="detail-row"><span class="detail-label">Shifts dit seizoen</span><span class="detail-value">${f.shifts}</span></div>
+    <div class="detail-row"><span class="detail-label">Uren dit seizoen</span><span class="detail-value">${f.hours}u</span></div>
+    <div class="detail-row"><span class="detail-label">Laatste shift</span><span class="detail-value">${f.lastShift}</span></div>
+    <div class="detail-row"><span class="detail-label">T-shirt maat</span><span class="detail-value">${f.tshirtSize}</span></div>
+    <div class="detail-row"><span class="detail-label">Noodcontact</span><span class="detail-value">${f.emergencyContact}</span></div>
+    ${f.notes?`<div style="margin-top:16px;padding:14px;background:var(--surface);border-radius:var(--radius-sm);font-size:13px;color:var(--body);line-height:1.6"><strong style="color:var(--ink)">Notities:</strong> ${f.notes}</div>`:''}
+    <div style="margin-top:20px;display:flex;gap:8px">
+      <button class="btn btn-primary btn-sm" style="flex:1">${ICONS.mail} Bericht sturen</button>
+      <button class="btn btn-secondary btn-sm" style="flex:1">Bewerk profiel</button>
+    </div>
+  `;
+}
+
+function renderVolAssignModal(eventId, role) {
+  const available = DATA.vrijwilligers.list.filter(f=>f.status==='Actief'&&f.skills.includes(role));
+  const ev = DATA.vrijwilligers.upcoming.find(u=>u.id===eventId);
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+      <h2>Vrijwilliger toewijzen — ${role}</h2>
+      <button class="btn btn-ghost" onclick="closeModal()" style="font-size:18px">&times;</button>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px">${ev?ev.production:''} — ${ev?ev.date:''}</div>
+    <div style="margin-bottom:12px;font-size:13px;font-weight:600;color:var(--ink)">Beschikbare vrijwilligers met vaardigheid "${role}":</div>
+    ${available.length>0?available.map(f=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:600;color:var(--ink)">${f.name}</div>
+        <div style="font-size:12px;color:var(--muted)">${f.available} — ${f.shifts} shifts dit seizoen</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="closeModal()">Toewijzen</button>
+    </div>`).join(''):`<p style="color:var(--muted);font-size:13px;padding:16px 0">Geen beschikbare vrijwilligers met deze vaardigheid. Overweeg een open oproep te versturen.</p>`}
+    <div style="margin-top:16px"><button class="btn btn-secondary" style="width:100%">${ICONS.mail} Open oproep versturen naar alle vrijwilligers</button></div>
+  `;
+}
+
+// ── 16. TOEGANKELIJKHEID ──
+function renderToegankelijkheid() {
+  const t = DATA.toegankelijkheid;
+  const el = $('#screen-toegankelijkheid');
+  const yesNo = v => v ? '<span style="color:var(--accent);font-weight:600">Ja</span>' : '<span style="color:var(--muted)">Nee</span>';
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Toegankelijkheid</h1><div class="topbar-sub">Inclusie-tracking per locatie, voorstelling en bezoeker</div></div></div>
+  <div class="content">
+    <div class="stats-grid" style="grid-template-columns:repeat(5,1fr)">
+      <div class="card"><div class="stat-label">Rolstoel</div><div class="stat-value">${t.patronNeeds.wheelchair}</div><div class="stat-sub">Contacten met nood</div></div>
+      <div class="card"><div class="stat-label">Gehoor</div><div class="stat-value">${t.patronNeeds.hearingAid}</div><div class="stat-sub">Hoorapparaat / ringleiding</div></div>
+      <div class="card"><div class="stat-label">Visueel</div><div class="stat-value">${t.patronNeeds.visualImpair}</div><div class="stat-sub">Audiodescriptie nood</div></div>
+      <div class="card"><div class="stat-label">Sensorisch</div><div class="stat-value">${t.patronNeeds.sensory}</div><div class="stat-sub">Prikkelarme nood</div></div>
+      <div class="card"><div class="stat-label">Begeleider</div><div class="stat-value">${t.patronNeeds.companion}</div><div class="stat-sub">Begeleidersplaats nodig</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><div class="section-title">Locatie-matrix</div></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>Locatie</th><th>Rolstoel</th><th>Ringleiding</th><th>Rolstoelplaatsen</th><th>Drempelvrij</th><th>Aangepast sanitair</th></tr></thead>
+        <tbody>${t.venueMatrix.map(v=>`<tr><td class="contact-name">${v.venue}</td><td>${yesNo(v.wheelchair)}</td><td>${yesNo(v.hearingLoop)}</td><td style="font-weight:600">${v.wheelchairSeats}</td><td>${yesNo(v.stepFree)}</td><td>${yesNo(v.accessibleWC)}</td></tr>`).join('')}</tbody></table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><div class="section-title">Voorstellingen met toegankelijkheidsvoorzieningen</div></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>Voorstelling</th><th>Datum</th><th>Gebarentolk</th><th>Audiodescriptie</th><th>Boventitels</th><th>Prikkelarm</th></tr></thead>
+        <tbody>${t.performances.map(p=>`<tr><td class="contact-name">${p.title}</td><td style="color:var(--muted)">${p.date}</td><td>${yesNo(p.signLang)}</td><td>${yesNo(p.audioDesc)}</td><td>${yesNo(p.surtitles)}</td><td>${yesNo(p.sensoryFriendly)}</td></tr>`).join('')}</tbody></table>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── 17. AUTOMATISERING ──
+function renderAutomatisering() {
+  const a = DATA.automatisering;
+  const el = $('#screen-automatisering');
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Workflows</h1><div class="topbar-sub">Automatische opvolging na bezoek, herinneringen en triggers</div></div><div class="topbar-actions"><button class="btn btn-primary btn-sm">${ICONS.plus} Nieuwe workflow</button></div></div>
+  <div class="content">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      ${a.workflows.map(w=>`<div class="card" style="display:flex;align-items:center;gap:20px">
+        <div style="width:44px;height:44px;border-radius:var(--radius);background:${w.status==='Actief'?'var(--accent-light)':w.status==='Concept'?'var(--amber-light)':'var(--surface)'};color:${w.status==='Actief'?'var(--accent)':w.status==='Concept'?'var(--amber)':'var(--muted)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${ICONS.zap}</div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:600;color:var(--ink)">${w.name}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px"><strong style="color:var(--body)">Trigger:</strong> ${w.trigger}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px"><strong style="color:var(--body)">Actie:</strong> ${w.action}</div>
+        </div>
+        <div style="text-align:right;min-width:100px">
+          <span class="tag tag-${w.status==='Actief'?'green':w.status==='Concept'?'amber':'default'}">${w.status}</span>
+          ${w.sent>0?`<div style="font-size:12px;color:var(--muted);margin-top:6px">${fmtN(w.sent)} verstuurd</div>`:''}
+          ${w.conversion!=='—'?`<div style="font-size:12px;font-weight:600;color:var(--accent);margin-top:2px">${w.conversion} conversie</div>`:''}
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ── 18. LOCATIES ──
+function renderLocaties() {
+  const locs = DATA.locaties;
+  const el = $('#screen-locaties');
+  const totalEvents = locs.reduce((a,l)=>a+l.events,0);
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Locaties</h1><div class="topbar-sub">${locs.length} speelplekken — ${totalEvents} events dit seizoen</div></div></div>
+  <div class="content">
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card"><div class="stat-label">Eigen locaties</div><div class="stat-value">${locs.filter(l=>l.type==='Eigen').length}</div><div class="stat-sub">Kaaistudio's + Saincteletteplein (renovatie)</div></div>
+      <div class="card"><div class="stat-label">Partnerlocaties</div><div class="stat-value">${locs.filter(l=>l.type==='Partner').length}</div><div class="stat-sub">Nomadisch netwerk Brussel</div></div>
+      <div class="card"><div class="stat-label">Totale capaciteit</div><div class="stat-value">${fmtN(locs.filter(l=>l.status.includes('Actief')).reduce((a,l)=>a+l.capacity,0))}</div><div class="stat-sub">Over alle actieve locaties</div></div>
+    </div>
+    <div class="grid-2">
+      ${locs.map(l=>`<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-size:15px;font-weight:600;color:var(--ink)">${l.name}</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px">${l.city}</div>
+          </div>
+          <span class="tag tag-${l.type==='Eigen'?'green':'blue'}">${l.type}</span>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:24px">
+          <div><div style="font-size:11px;color:var(--muted)">Capaciteit</div><div style="font-size:18px;font-weight:700;color:var(--ink)">${l.capacity>0?l.capacity:'—'}</div></div>
+          <div><div style="font-size:11px;color:var(--muted)">Events dit seizoen</div><div style="font-size:18px;font-weight:700;color:var(--ink)">${l.events}</div></div>
+        </div>
+        <div style="margin-top:12px"><span class="tag tag-${l.status.includes('Actief')?'green':l.status.includes('renovatie')?'amber':'default'}">${l.status}</span></div>
+        ${l.note?`<div style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.6">${l.note}</div>`:''}
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ── 19. LIDMAATSCHAP / VRIENDENKRING ──
+function renderLidmaatschap() {
+  const lid = DATA.lidmaatschap;
+  const el = $('#screen-lidmaatschap');
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Vriendenkring</h1><div class="topbar-sub">Lidmaatschappen, FlexPas en vriendenvoordelen</div></div></div>
+  <div class="content">
+    <div class="stats-grid">
+      <div class="card"><div class="stat-label">Totaal leden</div><div class="stat-value">${lid.stats.totalMembers}</div><div class="stat-sub">Actieve vrienden</div></div>
+      <div class="card"><div class="stat-label">Inkomsten</div><div class="stat-value">&euro; ${fmtN(lid.stats.revenue)}</div><div class="stat-sub">Dit seizoen</div></div>
+      <div class="card"><div class="stat-label">Verlengingsgraad</div><div class="stat-value">${lid.stats.renewalRate}%</div><div class="stat-sub">Van vorig seizoen</div></div>
+      <div class="card"><div class="stat-label">Verloren leden</div><div class="stat-value">${lid.stats.lapsedLastYear}</div><div class="stat-sub">Niet verlengd vorig jaar</div></div>
+    </div>
+
+    <div class="section-header"><div class="section-title">Tiers</div></div>
+    <div class="grid-3" style="margin-bottom:24px">
+      ${lid.tiers.map(t=>`<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="font-size:17px;font-weight:700;color:var(--ink)">${t.name}</div>
+          <div style="font-size:18px;font-weight:700;color:var(--accent)">&euro; ${t.price}<span style="font-size:12px;font-weight:400;color:var(--muted)">/jaar</span></div>
+        </div>
+        <div style="font-size:20px;font-weight:700;color:var(--ink);margin:12px 0">${t.members} <span style="font-size:13px;font-weight:400;color:var(--muted)">leden</span></div>
+        <ul style="list-style:none;padding:0;margin:0">
+          ${t.benefits.map(b=>`<li style="padding:6px 0;border-top:1px solid var(--border);font-size:13px;color:var(--body);display:flex;align-items:center;gap:8px"><span style="color:var(--accent)">${ICONS.check}</span>${b}</li>`).join('')}
+        </ul>
+      </div>`).join('')}
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:16px;font-weight:600;color:var(--ink)">${lid.flexPas.name}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px">${lid.flexPas.desc}</div>
+        </div>
+        <div style="font-size:18px;font-weight:700;color:var(--accent)">&euro; ${lid.flexPas.price}</div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:24px">
+        <div><div style="font-size:11px;color:var(--muted)">Verkocht</div><div style="font-size:20px;font-weight:700;color:var(--ink)">${lid.flexPas.sold}</div></div>
+        <div><div style="font-size:11px;color:var(--muted)">Credits gebruikt</div><div style="font-size:20px;font-weight:700;color:var(--ink)">${lid.flexPas.creditsUsed} / ${lid.flexPas.creditsTotal}</div></div>
+      </div>
+      <div class="progress" style="margin-top:12px;height:8px"><div class="progress-fill" style="width:${pct(lid.flexPas.creditsUsed,lid.flexPas.creditsTotal)}%;background:var(--accent)"></div></div>
+    </div>
+  </div>`;
+}
+
+// ── 20. COOPERATIE PORTAAL ──
+function renderCooperatie() {
+  const el = $('#screen-cooperatie');
+  const coop = DATA.coop;
+  const tagColors = {Ticketing:'blue',Participatie:'green',Rapportage:'amber',Data:'purple',Vrijwilligers:'green',UX:'coral',AI:'amber',GDPR:'coral',Integratie:'blue',Campagnes:'blue',Fundraising:'amber',Benchmarks:'green'};
+
+  el.innerHTML = `
+  <div class="topbar">
+    <div><h1>Sector Portaal</h1><div class="topbar-sub">${coop.houses.length} cultuurhuizen bouwen samen aan een platform</div></div>
+  </div>
+  <div class="content">
+
+    <!-- Tabs voor structuur -->
+    <div class="tabs" id="coop-tabs">
+      <button class="tab active" onclick="switchCoopTab('overzicht')">Overzicht</button>
+      <button class="tab" onclick="switchCoopTab('roadmap')">Roadmap</button>
+      <button class="tab" onclick="switchCoopTab('ideeenbus')">Ideeenbus</button>
+      <button class="tab" onclick="switchCoopTab('sessies')">Co-creatie sessies</button>
+    </div>
+
+    <!-- TAB: Overzicht -->
+    <div id="coop-tab-overzicht" class="tab-content active">
+
+      <div class="grid-3" style="margin-bottom:24px">
+        ${coop.governance.map(g=>`<div class="card">
+          <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:16px">${ICONS[g.icon]}</div>
+          <div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:8px">${g.title}</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.7">${g.desc}</div>
+        </div>`).join('')}
+      </div>
+
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Aangesloten huizen</div>
+          <span style="font-size:13px;color:var(--muted)">${coop.houses.length} organisaties</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          ${coop.houses.map(h=>`<div style="padding:16px;border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;gap:12px">
+            <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:var(--surface);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--ink);flex-shrink:0">${h.name.substring(0,2)}</div>
+            <div>
+              <div style="font-weight:600;color:var(--ink);font-size:13px">${h.name}</div>
+              <div style="font-size:12px;color:var(--muted)">${h.city}</div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Roadmap -->
+    <div id="coop-tab-roadmap" class="tab-content">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:24px">Ontwikkeling 2025 – 2026</div>
+        ${coop.roadmap.map((r,i)=>`<div style="display:flex;gap:20px;padding:20px 0;${i<coop.roadmap.length-1?'border-bottom:1px solid var(--border)':''}">
+          <div style="width:80px;flex-shrink:0">
+            <div style="font-size:13px;font-weight:600;color:var(--ink)">${r.period}</div>
+            <span class="tag tag-${r.status==='Opgeleverd'?'green':r.status==='In ontwikkeling'?'blue':'default'}" style="margin-top:6px">${r.status}</span>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:15px;font-weight:600;color:var(--ink)">${r.title}</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px;line-height:1.6">${r.desc}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- TAB: Ideeenbus -->
+    <div id="coop-tab-ideeenbus" class="tab-content">
+      <div class="grid-23">
+        <div class="card" style="padding:0;overflow:hidden">
+          <div style="padding:20px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:600;color:var(--ink)">Feature-voorstellen</div>
+            <span style="font-size:13px;color:var(--muted)">${coop.backlog.length} voorstellen, ${coop.backlog.reduce((a,b)=>a+b.votes,0)} stemmen</span>
+          </div>
+          <table><thead><tr><th style="width:60px"></th><th>Voorstel</th><th>Voorgesteld door</th><th>Labels</th></tr></thead>
+          <tbody>${coop.backlog.sort((a,b)=>b.votes-a.votes).map(i=>`<tr>
+            <td><button onclick="this.classList.toggle('voted');const v=this.querySelector('.vc');const n=parseInt(v.textContent);v.textContent=this.classList.contains('voted')?n+1:n-1" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;width:48px;transition:all .15s">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              <span class="vc" style="font-size:13px;font-weight:700;color:var(--ink)">${i.votes}</span>
+            </button></td>
+            <td><div style="font-weight:600;color:var(--ink);font-size:13px">${i.title}</div></td>
+            <td style="color:var(--muted);font-size:13px">${i.house}</td>
+            <td>${i.tags.map(t=>`<span class="tag tag-${tagColors[t]||'default'}">${t}</span>`).join('')}</td>
+          </tr>`).join('')}</tbody></table>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-bottom:16px">Nieuw voorstel</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <textarea class="input" placeholder="Beschrijf je idee voor de sector..." style="min-height:120px;resize:vertical"></textarea>
+            <select class="input"><option value="">Kies een label...</option>${Object.keys(tagColors).map(t=>`<option>${t}</option>`).join('')}</select>
+            <button class="btn btn-primary" style="width:100%">Indienen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Sessies -->
+    <div id="coop-tab-sessies" class="tab-content">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        ${coop.sessions.map(s=>`<div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="font-size:15px;font-weight:600;color:var(--ink)">${s.title}</div>
+              <div style="font-size:13px;color:var(--muted);margin-top:4px">${s.date} — ${s.location}</div>
+            </div>
+            <span class="tag tag-${s.status==='Afgerond'?'green':s.status==='Gepland'?'blue':'default'}">${s.status}</span>
+          </div>
+          ${s.notes?`<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:13px;color:var(--body);line-height:1.7">${s.notes}</div>`:''}
+          ${s.status==='Gepland'?`<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;color:var(--muted)">${s.attendees>0?s.attendees+' huizen aangemeld':'Inschrijving open'}</span>
+            <button class="btn btn-primary btn-sm">Inschrijven</button>
+          </div>`:''}
+        </div>`).join('')}
+      </div>
+    </div>
+
+  </div>`;
+}
+
+function switchCoopTab(tab) {
+  $$('#screen-cooperatie .tab').forEach(t=>t.classList.remove('active'));
+  $$('#screen-cooperatie .tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  $(`#coop-tab-${tab}`).classList.add('active');
+}
+
+// ── 14. BENCHMARKS ──
+function renderBenchmarks() {
+  const el = $('#screen-benchmarks');
+  const b = DATA.benchmarks;
+
+  function benchSection(title, items) {
+    const maxVal = Math.max(...items.map(i=>Math.max(i.ours,i.sector)))*1.2;
+    return `<div class="card section">
+      <div class="section-title" style="margin-bottom:20px">${title}</div>
+      ${items.map(i=>{
+        const oursPct = (i.ours/maxVal*100);
+        const sectorPct = (i.sector/maxVal*100);
+        const isBetter = i.lowerBetter ? i.ours<i.sector : i.ours>i.sector;
+        const diff = i.lowerBetter ? i.sector-i.ours : i.ours-i.sector;
+        const diffPct = i.sector>0 ? Math.round(diff/i.sector*100) : 0;
+        return `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:13px;font-weight:500;color:var(--ink)">${i.label}</span>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:14px;font-weight:700;color:${isBetter?'var(--accent)':'var(--coral)'}">${i.ours}${i.unit}</span>
+              <span style="font-size:11px;color:var(--muted)">sector: ${i.sector}${i.unit}</span>
+              <span style="font-size:11px;font-weight:600;color:${isBetter?'var(--accent)':'var(--coral)'}; background:${isBetter?'var(--accent-light)':'var(--coral-light)'};padding:2px 8px;border-radius:999px">${isBetter?'+':''}${diffPct}%</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:4px;height:8px">
+            <div style="flex:1;background:#EAECF0;border-radius:4px;overflow:hidden;position:relative">
+              <div style="height:100%;width:${oursPct}%;background:${isBetter?'var(--accent)':'var(--coral)'};border-radius:4px;opacity:0.85"></div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  el.innerHTML = `
+  <div class="topbar"><div><h1>Benchmarks</h1><div class="topbar-sub">Vergelijk je prestaties met ${DATA.coop.houses.length} andere cultuurhuizen (geanonimiseerd)</div></div><div class="topbar-actions"><button class="btn btn-secondary btn-sm">${ICONS.download} Benchmark rapport</button></div></div>
+  <div class="content">
+
+    <div class="tabs" id="bench-tabs">
+      <button class="tab active" onclick="switchBenchTab('overzicht')">Overzicht</button>
+      <button class="tab" onclick="switchBenchTab('communicatie')">Communicatie</button>
+      <button class="tab" onclick="switchBenchTab('publiek')">Publiek</button>
+      <button class="tab" onclick="switchBenchTab('financieel')">Financieel</button>
+      <button class="tab" onclick="switchBenchTab('inclusie')">Inclusie</button>
+      <button class="tab" onclick="switchBenchTab('evolutie')">Seizoensevolutie</button>
+    </div>
+
+    <div id="bench-tab-overzicht" class="tab-content active">
+      <div class="stats-grid">
+        ${[
+          {label:'Beter dan sector',value:b.communicatie.filter(i=>i.lowerBetter?i.ours<i.sector:i.ours>i.sector).length + b.publiek.filter(i=>i.lowerBetter?i.ours<i.sector:i.ours>i.sector).length + b.financieel.filter(i=>i.lowerBetter?i.ours<i.sector:i.ours>i.sector).length + b.inclusie.filter(i=>i.lowerBetter?i.ours<i.sector:i.ours>i.sector).length,sub:'van ${b.communicatie.length+b.publiek.length+b.financieel.length+b.inclusie.length} metrieken'},
+          {label:'Sterkste punt',value:'Open rate',sub:'38,7% vs sector 28%'},
+          {label:'Aandachtspunt',value:'No-show',sub:'7,8% — dalend maar boven sector niet'},
+          {label:'Deelnemende huizen',value:DATA.coop.houses.length,sub:'Geanonimiseerde vergelijking'},
+        ].map(s=>`<div class="card"><div class="stat-label">${s.label}</div><div class="stat-value" style="font-size:${typeof s.value==='string'?'18px':'32px'}">${s.value}</div><div class="stat-sub">${s.sub}</div></div>`).join('')}
+      </div>
+      <div class="grid-2">
+        ${benchSection('Communicatie — hoogtepunten', b.communicatie.slice(0,2))}
+        ${benchSection('Publiek — hoogtepunten', b.publiek.slice(0,2))}
+      </div>
+      <div class="card" style="margin-top:20px">
+        <div class="section-title" style="margin-bottom:12px">Wat we leren van de sector</div>
+        <div class="grid-3">
+          <div style="padding:16px;background:var(--surface);border-radius:var(--radius-sm)">
+            <div style="font-weight:600;color:var(--ink);margin-bottom:6px">Beste praktijk: Servicemails</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6">Huizen die 3 dagen voor de voorstelling een locatie- en vervoersmail sturen, zien 40% minder no-shows. Jullie doen dit al.</div>
+          </div>
+          <div style="padding:16px;background:var(--surface);border-radius:var(--radius-sm)">
+            <div style="font-weight:600;color:var(--ink);margin-bottom:6px">Kans: Genre-specifieke campagnes</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6">Huizen die per genre segmenteren behalen 2x hogere click rates dan algemene nieuwsbrieven. Jullie Meg Stuart-campagne bevestigt dit.</div>
+          </div>
+          <div style="padding:16px;background:var(--surface);border-radius:var(--radius-sm)">
+            <div style="font-weight:600;color:var(--ink);margin-bottom:6px">Trend: Post-visit workflows</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6">62% van de huizen gebruikt nu automatische na-bezoek mails. Huizen die dit doen zien 15% meer terugkeer bij eerste bezoekers.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="bench-tab-communicatie" class="tab-content">${benchSection('Communicatie', b.communicatie)}</div>
+    <div id="bench-tab-publiek" class="tab-content">${benchSection('Publiek & bezetting', b.publiek)}</div>
+    <div id="bench-tab-financieel" class="tab-content">${benchSection('Financieel & engagement', b.financieel)}</div>
+    <div id="bench-tab-inclusie" class="tab-content">${benchSection('Inclusie & toegankelijkheid', b.inclusie)}</div>
+
+    <div id="bench-tab-evolutie" class="tab-content">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:20px">Jouw evolutie over 3 seizoenen</div>
+        <div class="card" style="padding:0;overflow:hidden;border:none">
+          <table><thead><tr><th>Seizoen</th><th style="text-align:right">Bezetting</th><th style="text-align:right">Nieuw publiek</th><th style="text-align:right">Open rate</th><th style="text-align:right">No-show</th><th>Trend</th></tr></thead>
+          <tbody>${b.seizoenen.map((s,i)=>{
+            const prev = i>0?b.seizoenen[i-1]:null;
+            const bezTrend = prev?s.bezetting-prev.bezetting:0;
+            return `<tr>
+              <td class="contact-name">${s.seizoen}</td>
+              <td style="text-align:right;font-weight:600">${s.bezetting}%</td>
+              <td style="text-align:right;font-weight:600">${s.nieuwPubliek}%</td>
+              <td style="text-align:right;font-weight:600">${s.openRate}%</td>
+              <td style="text-align:right;font-weight:600">${s.noShow}%</td>
+              <td>${bezTrend>0?`<span style="color:var(--accent);font-weight:600">+${bezTrend.toFixed(1)}%</span>`:bezTrend<0?`<span style="color:var(--coral);font-weight:600">${bezTrend.toFixed(1)}%</span>`:'—'}</td>
+            </tr>`;
+          }).join('')}</tbody></table>
+        </div>
+        <div style="margin-top:20px;padding:16px;background:var(--accent-light);border-radius:var(--radius-sm)">
+          <div style="font-weight:600;color:#137D5F;margin-bottom:4px">Samenvatting</div>
+          <div style="font-size:13px;color:#137D5F;line-height:1.6">Over 3 seizoenen: bezetting +7,4 procentpunt, nieuw publiek +4pp, open rate +6,6pp, no-shows -3,4pp. Alle kernindicatoren bewegen in de juiste richting.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>`;
+}
+function switchBenchTab(tab){$$('#screen-benchmarks .tab').forEach(t=>t.classList.remove('active'));$$('#screen-benchmarks .tab-content').forEach(t=>t.classList.remove('active'));event.target.classList.add('active');$(`#bench-tab-${tab}`).classList.add('active');}
+
+// ════════════════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════════════════
+function openModal(html) { $('#modal-content').innerHTML = html; $('#modal-overlay').classList.add('open'); }
+function closeModal() { $('#modal-overlay').classList.remove('open'); }
+
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
+renderSidebar();
+renderDashboard();
+</script>
+<!-- Comment tool -->
+<style>
+  :root {
+    --cm-ink: #1A1A2E;
+    --cm-muted: #9CA3AF;
+    --cm-accent: #1DA882;
+    --cm-bg: #FFFFFF;
+    --cm-surface: #F9FAFB;
+    --cm-border: #F0F0F5;
+    --cm-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    --cm-radius-card: 12px;
+    --cm-radius-btn: 8px;
+  }
+</style>
+<script src="comments.js"></script>
+</body>
+</html>
