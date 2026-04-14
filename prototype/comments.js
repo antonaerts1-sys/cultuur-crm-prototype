@@ -1061,7 +1061,8 @@
     const pageOrder = ['index.html', 'formulier-v2.html', 'secretaris.html'];
     const allPages = [...new Set([...pageOrder, ...Object.keys(allByPage)])];
 
-    let md = `# CTRG Zitpenningen - Dev Roadmap\n`;
+    const projectName = PAGE_NAMES[Object.keys(PAGE_NAMES).find(k=>k)] || document.title || 'Project';
+    let md = `# ${projectName} - Dev Roadmap\n`;
     md += `Gegenereerd op ${new Date().toLocaleDateString('nl-BE')}\n\n`;
 
     allPages.forEach(pg => {
@@ -1106,7 +1107,8 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'ctrg-roadmap.md';
+    const slug = projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/,'');
+    a.download = `${slug}-roadmap.md`;
     a.click();
     URL.revokeObjectURL(url);
   }
